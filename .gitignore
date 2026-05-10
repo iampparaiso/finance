@@ -3,3 +3,8 @@ frontend/config.js
 node_modules/
 .DS_Store
 Thumbs.db
+.env
+.env.local
+.vscode/
+.idea/
+*.log
