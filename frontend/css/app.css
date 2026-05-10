@@ -143,3 +143,7 @@
   .card-row  { box-shadow: var(--shadow1); }
   .log-form  { box-shadow: var(--shadow1); }
 }
+
+.deal-filter { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted2); cursor: pointer; font-size: 0.78rem; transition: all var(--t1); }
+.deal-filter:hover { border-color: var(--acc); color: var(--acc); }
+.deal-filter.active { background: var(--acc); color: #fff; border-color: var(--acc); }
