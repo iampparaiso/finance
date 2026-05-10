@@ -127,3 +127,19 @@
   .main { padding: var(--sp4); }
   .stat-grid { grid-template-columns: repeat(2, 1fr); }
 }
+
+@media (prefers-color-scheme: dark) {
+  .alert-bar.danger { background: rgba(192,57,43,0.18);  color: #e88880; border-left-color: #c0392b; }
+  .alert-bar.warn   { background: rgba(230,126,34,0.18); color: #f0a566; border-left-color: #e67e22; }
+  .alert-bar.info   { background: rgba(41,128,185,0.18); color: #72b8e8; border-left-color: #2980b9; }
+
+  .badge.danger { background: rgba(192,57,43,0.22);  color: #e88880; }
+  .badge.warn   { background: rgba(230,126,34,0.22); color: #f0a566; }
+  .badge.info   { background: rgba(41,128,185,0.22); color: #72b8e8; }
+  .badge.ok     { background: rgba(39,174,96,0.22);  color: #5ccc88; }
+
+  .nav { background: var(--surface); }
+  .stat-card { box-shadow: var(--shadow1); }
+  .card-row  { box-shadow: var(--shadow1); }
+  .log-form  { box-shadow: var(--shadow1); }
+}
