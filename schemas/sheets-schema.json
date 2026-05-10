@@ -1,0 +1,59 @@
+{
+  "sheets": [
+    {
+      "name": "Config",
+      "columns": ["Key", "Value", "Notes"],
+      "description": "App-wide settings: owner email, move-in date, emergency fund activation date"
+    },
+    {
+      "name": "Income",
+      "columns": ["Person", "PayDay", "Amount", "Active"],
+      "description": "Payday schedule — 4 rows (Joeann 10th, Paulo 15th, Joeann 25th, Paulo 30th)"
+    },
+    {
+      "name": "CreditCards",
+      "columns": ["ID", "Name", "Last4", "Network", "Limit", "CashAdvanceLimit", "Balance", "StatementCutDay", "DueDayOffset", "DueDate", "InterestRate", "Color", "PastDue", "UnbilledInstallments"],
+      "description": "One row per card — source of truth for all card metadata"
+    },
+    {
+      "name": "Installments",
+      "columns": ["ID", "CardID", "Description", "MonthlyAmount", "MonthsRemaining", "StartDate", "IsNew", "Note", "Status"],
+      "description": "All active CC installment plans with countdown"
+    },
+    {
+      "name": "BankLoans",
+      "columns": ["ID", "Bank", "Type", "AccountNo", "OutstandingBalance", "MonthlyAmortization", "InsurancePremium", "MonthlyPayment", "DueDay", "NextDueDate", "RemainingPayments", "MaturityDate", "InterestRate", "PayoffAmount"],
+      "description": "BPI Auto Loan + BPI Housing Loan"
+    },
+    {
+      "name": "RecurringBills",
+      "columns": ["ID", "Name", "Amount", "DueDay", "Category", "Frequency", "Active", "IsEstimate", "EndsOnMoveIn", "StartDate", "EndDate"],
+      "description": "All fixed monthly obligations"
+    },
+    {
+      "name": "Subscriptions",
+      "columns": ["ID", "Name", "Amount", "DueDay", "PaymentMethod", "Category", "Active"],
+      "description": "Digital subscriptions — some via GCash, some via CC"
+    },
+    {
+      "name": "SpendLog",
+      "columns": ["Timestamp", "Date", "Description", "Amount", "Category", "CardID", "Month", "AddedBy"],
+      "description": "Manual spend entries — appended by either user"
+    },
+    {
+      "name": "Renovation",
+      "columns": ["Timestamp", "Date", "Description", "Amount", "Category", "PaymentMethod", "Receipt", "AddedBy"],
+      "description": "All renovation expenses against the ₱1.2M target"
+    },
+    {
+      "name": "EmergencyFund",
+      "columns": ["Timestamp", "Date", "Type", "Amount", "Balance", "Notes"],
+      "description": "Emergency fund deposit/withdrawal log — activates July 2026"
+    },
+    {
+      "name": "Alerts",
+      "columns": ["ID", "Type", "Message", "Severity", "DueDate", "Resolved", "CreatedAt"],
+      "description": "System-generated alerts — past dues, upcoming bills, low balances"
+    }
+  ]
+}

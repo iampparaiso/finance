@@ -1,0 +1,5 @@
+appsscript/.clasp.json
+frontend/config.js
+node_modules/
+.DS_Store
+Thumbs.db

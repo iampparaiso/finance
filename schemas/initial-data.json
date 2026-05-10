@@ -1,0 +1,226 @@
+{
+  "paydays": [
+    { "person": "Joeann", "day": 10, "amount": 95000 },
+    { "person": "Paulo",  "day": 15, "amount": 94000 },
+    { "person": "Joeann", "day": 25, "amount": 95000 },
+    { "person": "Paulo",  "day": 30, "amount": 275000 }
+  ],
+  "creditCards": [
+    {
+      "id": "rcbc",
+      "name": "RCBC Visa Infinite",
+      "last4": "9003",
+      "network": "Visa",
+      "limit": 947000,
+      "cashAdvanceLimit": 250000,
+      "balance": 12107.72,
+      "statementCutDay": 10,
+      "dueDayOffset": 24,
+      "dueDate": "2026-06-03",
+      "interestRate": 0.03,
+      "color": "#e63946"
+    },
+    {
+      "id": "metrobank",
+      "name": "Metrobank Titanium Mastercard",
+      "last4": null,
+      "network": "Mastercard",
+      "limit": 502000,
+      "cashAdvanceLimit": null,
+      "balance": 0,
+      "statementCutDay": 9,
+      "dueDayOffset": 21,
+      "dueDate": null,
+      "interestRate": 0.03,
+      "color": "#3a86ff"
+    },
+    {
+      "id": "eastwest",
+      "name": "EastWest Platinum Mastercard",
+      "last4": "5002",
+      "network": "Mastercard",
+      "limit": 758000,
+      "cashAdvanceLimit": 227400,
+      "balance": 24571.48,
+      "statementCutDay": 15,
+      "dueDayOffset": 26,
+      "dueDate": "2026-05-11",
+      "interestRate": 0.03,
+      "color": "#2dc653",
+      "pastDue": true
+    },
+    {
+      "id": "unionbank",
+      "name": "UnionBank Rewards Platinum Visa",
+      "last4": "5021",
+      "network": "Visa",
+      "limit": 490000,
+      "cashAdvanceLimit": null,
+      "balance": 80462.07,
+      "statementCutDay": 23,
+      "dueDayOffset": 18,
+      "dueDate": "2026-05-11",
+      "interestRate": 0.03,
+      "color": "#ff8c00",
+      "pastDue": true
+    },
+    {
+      "id": "bpi",
+      "name": "BPI Signature Visa",
+      "last4": null,
+      "network": "Visa",
+      "limit": 641000,
+      "cashAdvanceLimit": null,
+      "balance": 106328.83,
+      "statementCutDay": 7,
+      "dueDayOffset": 20,
+      "dueDate": "2026-05-27",
+      "interestRate": 0.03,
+      "color": "#c9184a",
+      "unbilledInstallments": 464732.66
+    },
+    {
+      "id": "bdo",
+      "name": "BDO Visa Platinum",
+      "last4": "9850",
+      "network": "Visa",
+      "limit": 600000,
+      "cashAdvanceLimit": 180000,
+      "balance": 0,
+      "statementCutDay": 9,
+      "dueDayOffset": 19,
+      "dueDate": null,
+      "interestRate": 0.03,
+      "color": "#1d4ed8"
+    }
+  ],
+  "installments": [
+    {
+      "id": "ew-inst-1",
+      "cardId": "eastwest",
+      "description": "EastWest installment plan",
+      "monthlyAmount": 24388,
+      "monthsRemaining": 2,
+      "startDate": null
+    },
+    {
+      "id": "ub-inst-1",
+      "cardId": "unionbank",
+      "description": "UnionBank plan (2249)",
+      "monthlyAmount": 2249.58,
+      "monthsRemaining": 11,
+      "startDate": null
+    },
+    {
+      "id": "ub-inst-2",
+      "cardId": "unionbank",
+      "description": "UnionBank plan (16953)",
+      "monthlyAmount": 16953,
+      "monthsRemaining": 1,
+      "startDate": null
+    },
+    {
+      "id": "ub-inst-3",
+      "cardId": "unionbank",
+      "description": "UnionBank plan 6450760",
+      "monthlyAmount": 21862.16,
+      "monthsRemaining": 2,
+      "startDate": null
+    },
+    {
+      "id": "bpi-inst-1",
+      "cardId": "bpi",
+      "description": "BPI Signature installment plans",
+      "monthlyAmount": 19361.83,
+      "monthsRemaining": null,
+      "startDate": null,
+      "note": "TBD — check BPI app for full breakdown"
+    },
+    {
+      "id": "rcbc-inst-1",
+      "cardId": "rcbc",
+      "description": "RCBC new installment (June 2026)",
+      "monthlyAmount": 12101.92,
+      "monthsRemaining": 48,
+      "startDate": "2026-06-03",
+      "isNew": true
+    },
+    {
+      "id": "metro-inst-1",
+      "cardId": "metrobank",
+      "description": "Metrobank new installment (June 2026)",
+      "monthlyAmount": 14718.71,
+      "monthsRemaining": 36,
+      "startDate": "2026-06-01",
+      "isNew": true
+    }
+  ],
+  "bankLoans": [
+    {
+      "id": "bpi-auto",
+      "bank": "BPI",
+      "type": "Auto Loan",
+      "accountNo": "00000028933231",
+      "originalAmount": 2000000,
+      "outstandingBalance": 1684667.24,
+      "monthlyPayment": 41154,
+      "dueDay": 10,
+      "nextDueDate": "2026-06-10",
+      "remainingPayments": 49,
+      "maturityDate": "2030-05-10",
+      "payoffAmount": 1781692.08
+    },
+    {
+      "id": "bpi-housing",
+      "bank": "BPI",
+      "type": "Housing Loan",
+      "accountNo": "00000027408052",
+      "outstandingBalance": 9223387.46,
+      "monthlyAmortization": 116108.48,
+      "insurancePremium": 2900,
+      "monthlyPayment": 119008.48,
+      "dueDay": 20,
+      "nextDueDate": "2026-05-20",
+      "remainingPayments": 107,
+      "interestRate": 0.07,
+      "payoffAmount": 9263433.71
+    }
+  ],
+  "recurringBills": [
+    { "id": "condo-assoc",   "name": "Condo Association Dues",  "amount": 9216,     "dueDay": 15, "category": "housing",    "frequency": "monthly", "startDate": "2026-06-15", "active": true },
+    { "id": "helper-15",    "name": "Helper Salary (15th)",     "amount": 15150,    "dueDay": 15, "category": "household",  "frequency": "monthly", "active": true },
+    { "id": "helper-30",    "name": "Helper Salary (30th)",     "amount": 12000,    "dueDay": 30, "category": "household",  "frequency": "monthly", "active": true },
+    { "id": "rent-laspinas","name": "Rent Las Piñas",           "amount": 11500,    "dueDay": 1,  "category": "housing",    "frequency": "monthly", "active": true, "endsOnMoveIn": true },
+    { "id": "assoc-laspinas","name":"Las Piñas Assoc Dues",     "amount": 400,      "dueDay": 1,  "category": "housing",    "frequency": "monthly", "active": true, "endsOnMoveIn": true },
+    { "id": "prulife",      "name": "PruLife Insurance",        "amount": 2555,     "dueDay": 4,  "category": "insurance",  "frequency": "monthly", "active": true },
+    { "id": "zion-ot",      "name": "Zion's OT",                "amount": 3600,     "dueDay": null,"category": "health",    "frequency": "weekly",  "active": true },
+    { "id": "globe",        "name": "Globe Internet",           "amount": 1599,     "dueDay": 1,  "category": "utilities",  "frequency": "monthly", "active": true },
+    { "id": "maynilad",     "name": "Maynilad",                 "amount": 2000,     "dueDay": 15, "category": "utilities",  "frequency": "monthly", "active": true, "isEstimate": true },
+    { "id": "meralco",      "name": "Meralco",                  "amount": 12000,    "dueDay": 25, "category": "utilities",  "frequency": "monthly", "active": true, "isEstimate": true },
+    { "id": "allowance",    "name": "Parent's Allowance",       "amount": 9000,     "dueDay": 1,  "category": "family",     "frequency": "monthly", "active": true },
+    { "id": "tithe-10",     "name": "Tithe (10th)",             "amount": 9500,     "dueDay": 10, "category": "giving",     "frequency": "monthly", "active": true },
+    { "id": "tithe-25",     "name": "Tithe (25th)",             "amount": 9500,     "dueDay": 25, "category": "giving",     "frequency": "monthly", "active": true },
+    { "id": "alfonso-lot",  "name": "Alfonso Lot",              "amount": 53083.33, "dueDay": 19, "category": "property",   "frequency": "monthly", "active": true, "endDate": "2028-07-19" }
+  ],
+  "subscriptions": [
+    { "id": "netflix",    "name": "Netflix",         "amount": 619, "dueDay": 25, "paymentMethod": "GCash",             "category": "entertainment" },
+    { "id": "youtube",    "name": "YouTube Premium", "amount": 189, "dueDay": 21, "paymentMethod": "GCash",             "category": "entertainment" },
+    { "id": "hbomax",     "name": "HBO Max",         "amount": 149, "dueDay": 1,  "paymentMethod": "GCash",             "category": "entertainment" },
+    { "id": "spotify",    "name": "Spotify",         "amount": 279, "dueDay": 7,  "paymentMethod": "BPI Credit Card",   "category": "entertainment" },
+    { "id": "googleone",  "name": "Google One",      "amount": 179, "dueDay": 8,  "paymentMethod": "EastWest Credit Card","category": "productivity" }
+  ],
+  "renovation": {
+    "name": "Condo Renovation",
+    "onHandBudget": 570000,
+    "targetBudget": 1200000,
+    "status": "planning",
+    "expectedCompletionMonth": "2026-07",
+    "categories": ["Contractor", "Materials", "Appliances", "Furniture", "Fixtures", "Miscellaneous"]
+  },
+  "emergencyFund": {
+    "target": 500000,
+    "currentBalance": 0,
+    "activationDate": "2026-07-01",
+    "status": "pending"
+  }
+}
