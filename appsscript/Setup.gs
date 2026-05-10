@@ -10,7 +10,7 @@ function setupSheets() {
   _createSheet(ss, 'BankLoans',     ['ID','Bank','Type','AccountNo','OutstandingBalance','MonthlyAmortization','InsurancePremium','MonthlyPayment','DueDay','NextDueDate','RemainingPayments','MaturityDate','InterestRate','PayoffAmount']);
   _createSheet(ss, 'RecurringBills',['ID','Name','Amount','DueDay','Category','Frequency','Active','IsEstimate','EndsOnMoveIn','StartDate','EndDate']);
   _createSheet(ss, 'Subscriptions', ['ID','Name','Amount','DueDay','PaymentMethod','Category','Active']);
-  _createSheet(ss, 'SpendLog',      ['Timestamp','Date','Description','Amount','Category','CardID','Month','AddedBy']);
+  _createSheet(ss, 'SpendLog',      ['Timestamp','Date','Description','Amount','Category','CardID','Month','Notes','AddedBy']);
   _createSheet(ss, 'Renovation',    ['Timestamp','Date','Description','Amount','Category','PaymentMethod','Receipt','AddedBy']);
   _createSheet(ss, 'EmergencyFund', ['Timestamp','Date','Type','Amount','Balance','Notes']);
   _createSheet(ss, 'Alerts',        ['ID','Type','Message','Severity','DueDate','Resolved','CreatedAt']);

@@ -42,17 +42,24 @@ function doPost(e) {
   try {
     switch (action) {
       case 'logSpend':
+        var ts = new Date().toISOString();
         appendRow('SpendLog', {
-          Timestamp:   new Date().toISOString(),
+          Timestamp:   ts,
           Date:        body.date,
           Description: body.description,
           Amount:      body.amount,
           Category:    body.category,
           CardID:      body.cardId,
-          Month:       body.month,
+          Month:       (body.date || '').slice(0, 7),
+          Notes:       body.notes || '',
           AddedBy:     email
         });
-        return _ok({ success: true });
+        return _ok({ success: true, id: ts });
+
+      case 'deleteSpend':
+        var deleted = _deleteSpendRow(body.id);
+        return deleted ? _ok({ success: true }) : _error('Row not found');
+
 
       case 'logRenovation':
         appendRow('Renovation', {
@@ -157,6 +164,21 @@ function _error(msg) {
   return ContentService
     .createTextOutput(JSON.stringify({ ok: false, error: msg }))
     .setMimeType(ContentService.MimeType.JSON);
+}
+
+function _deleteSpendRow(id) {
+  var sheet = getSheet('SpendLog');
+  var data  = sheet.getDataRange().getValues();
+  var headers = data[0];
+  var tsCol = headers.indexOf('Timestamp');
+  if (tsCol === -1) return false;
+  for (var i = 1; i < data.length; i++) {
+    if (String(data[i][tsCol]) === String(id)) {
+      sheet.deleteRow(i + 1);
+      return true;
+    }
+  }
+  return false;
 }
 
 function testGetDashboard() {
