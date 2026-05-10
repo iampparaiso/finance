@@ -1,0 +1,76 @@
+:root {
+  --bg:        #f5f0eb;
+  --bg2:       #ede8e3;
+  --surface:   #ffffff;
+  --surface2:  #f9f6f3;
+  --border:    #e0d9d2;
+  --text:      #1a1814;
+  --text2:     #4a453f;
+  --muted:     #8a847d;
+  --muted2:    #b0aaa3;
+
+  --acc:       #c4622d;
+  --acc2:      #6b8e6e;
+  --acc3:      #4a7c59;
+  --danger:    #c0392b;
+  --warn:      #e67e22;
+  --info:      #2980b9;
+  --ok:        #27ae60;
+
+  --rcbc:      #e63946;
+  --metro:     #3a86ff;
+  --ew:        #2dc653;
+  --ub:        #ff8c00;
+  --bpi:       #c9184a;
+  --bdo:       #1d4ed8;
+
+  --font-sans: 'Inter', 'Helvetica Neue', sans-serif;
+  --font-mono: 'DM Mono', 'Fira Code', monospace;
+
+  --sp1: 4px;
+  --sp2: 8px;
+  --sp3: 12px;
+  --sp4: 16px;
+  --sp5: 24px;
+  --sp6: 32px;
+  --sp7: 48px;
+
+  --r1: 6px;
+  --r2: 12px;
+  --r3: 18px;
+  --r4: 24px;
+
+  --shadow1: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow2: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow3: 0 8px 24px rgba(0,0,0,0.10);
+
+  --t1: 150ms ease;
+  --t2: 250ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:       #1a1814;
+    --bg2:      #201e1a;
+    --surface:  #2a2723;
+    --surface2: #302d29;
+    --border:   #3d3a35;
+    --text:     #f0ebe5;
+    --text2:    #c8c3bc;
+    --muted:    #7a756e;
+    --muted2:   #5a5550;
+  }
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-sans);
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono { font-family: var(--font-mono); }
