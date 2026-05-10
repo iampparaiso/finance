@@ -123,9 +123,51 @@
 
 /* === RESPONSIVE === */
 @media (max-width: 640px) {
-  .nav-tabs { display: none; }
-  .main { padding: var(--sp4); }
-  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  /* Nav: brand + refresh on top row, tabs scroll below */
+  .nav { flex-wrap: wrap; padding: var(--sp2) var(--sp3); gap: var(--sp2); }
+  .nav-brand { font-size: 0.88rem; }
+  .nav-tabs {
+    display: flex;
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 0 0 2px;
+    flex-wrap: nowrap;
+  }
+  .nav-tabs::-webkit-scrollbar { display: none; }
+  .nav-tab { white-space: nowrap; flex-shrink: 0; padding: 5px 10px; font-size: 0.78rem; }
+
+  /* Main */
+  .main { padding: var(--sp3); }
+
+  /* Page header — stack vertically */
+  .page-header { flex-direction: column; align-items: flex-start; gap: var(--sp1); }
+  .page-header h1 { font-size: 1.2rem; }
+
+  /* Stat grid — 2 col, smaller numbers */
+  .stat-grid { grid-template-columns: repeat(2, 1fr); gap: var(--sp3); }
+  .stat-value { font-size: 1.2rem; }
+
+  /* Form — single column */
+  .form-row { grid-template-columns: 1fr; }
+
+  /* Tables — horizontal scroll */
+  div:has(> .data-table) { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+  .data-table { min-width: 460px; }
+
+  /* Deal filter bar — horizontal scroll instead of wrap */
+  #deal-filters { flex-wrap: nowrap !important; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; padding-bottom: 4px; }
+  #deal-filters::-webkit-scrollbar { display: none; }
+  .deal-filter { flex-shrink: 0; }
+
+  /* Cards detail grid */
+  .detail-grid { grid-template-columns: repeat(2, 1fr); }
+
+  /* Breakdown rows — allow value to wrap below label on very small screens */
+  .breakdown-row { gap: var(--sp2); }
+  .breakdown-row > span:last-child { text-align: right; }
 }
 
 @media (prefers-color-scheme: dark) {

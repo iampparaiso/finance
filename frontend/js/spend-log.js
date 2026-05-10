@@ -171,7 +171,7 @@ export async function renderSpendLog(container) {
       `).join('')}
     </div>` : ''}
     <p class="section-title">All Transactions</p>
-    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);overflow-x:auto;-webkit-overflow-scrolling:touch">
       <table class="data-table" id="sl-table">
         <thead><tr>
           <th>Date</th>
