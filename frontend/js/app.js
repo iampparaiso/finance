@@ -6,6 +6,7 @@ import { renderLoans }         from './loans.js';
 import { renderBills }         from './bills.js';
 import { renderRenovation }    from './renovation.js';
 import { renderEmergencyFund } from './emergency-fund.js';
+import { renderSpendLog }      from './spend-log.js';
 
 const MODULES = {
   dashboard:        renderDashboard,
@@ -14,7 +15,8 @@ const MODULES = {
   loans:            renderLoans,
   bills:            renderBills,
   renovation:       renderRenovation,
-  'emergency-fund': renderEmergencyFund
+  'emergency-fund': renderEmergencyFund,
+  'spend-log':      renderSpendLog
 };
 
 let currentModule = 'dashboard';
