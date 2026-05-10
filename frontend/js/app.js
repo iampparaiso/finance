@@ -7,6 +7,10 @@ import { renderBills }         from './bills.js';
 import { renderRenovation }    from './renovation.js';
 import { renderEmergencyFund } from './emergency-fund.js';
 import { renderSpendLog }      from './spend-log.js';
+import { renderDeals }         from './deals.js';
+import { renderBestCard }      from './best-card.js';
+import { renderCalendarView }  from './calendar-view.js';
+import { renderIncome }        from './income.js';
 
 const MODULES = {
   dashboard:        renderDashboard,
@@ -16,7 +20,11 @@ const MODULES = {
   bills:            renderBills,
   renovation:       renderRenovation,
   'emergency-fund': renderEmergencyFund,
-  'spend-log':      renderSpendLog
+  'spend-log':      renderSpendLog,
+  deals:            renderDeals,
+  'best-card':      renderBestCard,
+  calendar:         renderCalendarView,
+  income:           renderIncome
 };
 
 let currentModule = 'dashboard';
