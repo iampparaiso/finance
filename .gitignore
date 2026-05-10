@@ -1,5 +1,5 @@
 appsscript/.clasp.json
-frontend/config.js
+# frontend/config.js — committed since API is auth-protected
 node_modules/
 .DS_Store
 Thumbs.db
