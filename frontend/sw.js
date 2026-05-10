@@ -1,7 +1,8 @@
-const CACHE = 'finance-os-v1';
+const CACHE = 'finance-os-v3';
 const PRECACHE = [
   '/finance/',
   '/finance/index.html',
+  '/finance/config.js',
   '/finance/manifest.json',
   '/finance/css/tokens.css',
   '/finance/css/app.css',
@@ -9,13 +10,18 @@ const PRECACHE = [
   '/finance/js/api.js',
   '/finance/js/format.js',
   '/finance/js/calendar.js',
+  '/finance/js/calendar-view.js',
   '/finance/js/dashboard.js',
   '/finance/js/cards.js',
   '/finance/js/installments.js',
   '/finance/js/loans.js',
   '/finance/js/bills.js',
   '/finance/js/renovation.js',
-  '/finance/js/emergency-fund.js'
+  '/finance/js/emergency-fund.js',
+  '/finance/js/spend-log.js',
+  '/finance/js/deals.js',
+  '/finance/js/best-card.js',
+  '/finance/js/income.js'
 ];
 
 self.addEventListener('install', e => {
