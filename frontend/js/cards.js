@@ -25,7 +25,7 @@ export async function renderCards(container) {
 
   container.querySelectorAll('.card-head').forEach(h => {
     h.addEventListener('click', () => {
-      h.nextElementSibling?.nextElementSibling?.classList.toggle('open');
+      h.closest('.card-row')?.querySelector('.card-detail')?.classList.toggle('open');
     });
   });
 }

@@ -20,7 +20,7 @@ export function safeToSpend(bills, installments, loans, subscriptions) {
 
   const billsDueBeforePayday = [
     ...bills.filter(b => {
-      if (!b.Active || b.Active === 'FALSE') return false;
+      if (b.Active !== true && b.Active !== 'TRUE') return false;
       const d = Number(b.DueDay);
       return d > todayDay && d <= nextPayday.day;
     }).map(b => ({ name: b.Name, amount: Number(b.Amount), day: Number(b.DueDay) })),
@@ -55,7 +55,7 @@ export function buildMonthCalendar(year, month, bills, loans, subscriptions, ins
     events.push({ day: p.day, type: 'income', label: `${p.person} Payday`, amount: p.amount });
   });
 
-  bills.filter(b => b.Active && b.Active !== 'FALSE' && b.Frequency === 'monthly' && Number(b.DueDay) > 0).forEach(b => {
+  bills.filter(b => (b.Active === true || b.Active === 'TRUE') && b.Frequency === 'monthly' && Number(b.DueDay) > 0).forEach(b => {
     events.push({ day: Number(b.DueDay), type: 'bill', label: b.Name, amount: Number(b.Amount) });
   });
 
@@ -63,7 +63,7 @@ export function buildMonthCalendar(year, month, bills, loans, subscriptions, ins
     events.push({ day: Number(l.DueDay), type: 'loan', label: `${l.Bank} ${l.Type}`, amount: Number(l.MonthlyPayment) });
   });
 
-  subscriptions.filter(s => s.Active && s.Active !== 'FALSE').forEach(s => {
+  subscriptions.filter(s => s.Active === true || s.Active === 'TRUE').forEach(s => {
     events.push({ day: Number(s.DueDay), type: 'subscription', label: s.Name, amount: Number(s.Amount) });
   });
 

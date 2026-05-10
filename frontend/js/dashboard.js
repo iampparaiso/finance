@@ -1,5 +1,5 @@
 import { get } from './api.js';
-import { peso, dateStr, daysUntil, dueBadge, pct } from './format.js';
+import { peso, pct } from './format.js';
 
 export async function renderDashboard(container) {
   const d = await get('getDashboard');

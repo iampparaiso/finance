@@ -43,6 +43,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function loadModule(name) {
   const main = document.getElementById('main');
+  if (!MODULES[name]) {
+    main.innerHTML = `<div class="error-state">Unknown module: ${name}</div>`;
+    return;
+  }
   main.innerHTML = '<div class="loading-spinner">Loading...</div>';
   try {
     await MODULES[name](main);

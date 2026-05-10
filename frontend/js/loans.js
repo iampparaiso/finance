@@ -28,9 +28,6 @@ export async function renderLoans(container) {
             ${Number(l.InterestRate)>0?`<div class="detail-item"><div class="dl">Interest Rate</div><div class="dv danger">${(Number(l.InterestRate)*100).toFixed(1)}%/yr</div></div>`:''}
             ${Number(l.InsurancePremium)>0?`<div class="detail-item"><div class="dl">Insurance Premium</div><div class="dv">${peso(l.InsurancePremium)}/mo</div></div>`:''}
           </div>
-          <div class="progress-bar" style="margin-top:var(--sp4)">
-            <div class="progress-fill" style="width:${Math.max(0,100-Math.round((Number(l.RemainingPayments)/((Number(l.RemainingPayments)||1)+1))*100))}%"></div>
-          </div>
         </div>
       </div>
     `).join('')}

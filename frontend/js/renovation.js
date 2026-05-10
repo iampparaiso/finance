@@ -6,6 +6,11 @@ export async function renderRenovation(container) {
   const configMap = {};
   config.forEach(r => { configMap[r.Key] = r.Value; });
 
+  if (!configMap['renovation_on_hand'] || !configMap['renovation_target']) {
+    container.innerHTML = '<div class="error-state">Config error: renovation_on_hand or renovation_target missing from Sheets. Run setupSheets() first.</div>';
+    return;
+  }
+
   const onHand  = Number(configMap['renovation_on_hand']  || 570000);
   const target  = Number(configMap['renovation_target']   || 1200000);
   const spent   = rows.reduce((s, r) => s + Number(r.Amount), 0);
