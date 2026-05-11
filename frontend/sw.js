@@ -1,4 +1,4 @@
-const CACHE = 'finance-os-v3';
+const CACHE = 'finance-os-v4';
 const PRECACHE = [
   '/finance/',
   '/finance/index.html',
@@ -11,6 +11,8 @@ const PRECACHE = [
   '/finance/js/format.js',
   '/finance/js/calendar.js',
   '/finance/js/calendar-view.js',
+  '/finance/js/alerts.js',
+  '/finance/js/cash-tracker.js',
   '/finance/js/dashboard.js',
   '/finance/js/cards.js',
   '/finance/js/installments.js',
