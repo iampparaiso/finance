@@ -20,6 +20,11 @@ function doGet(e) {
       case 'getIncome':       result = getRows('Income'); break;
       case 'getConfig':       result = getRows('Config'); break;
       case 'getAlerts':       result = getRows('Alerts'); break;
+      case 'getCashLog':
+        var cashLogRows = getRows('CashLog');
+        var cashOnHand  = Number(_getConfigValue('cash_on_hand') || 0);
+        result = { entries: cashLogRows, cashOnHand: cashOnHand };
+        break;
       default:
         return ContentService
           .createTextOutput(JSON.stringify({ error: 'Unknown action: ' + action }))
@@ -100,6 +105,72 @@ function doPost(e) {
         updateRowById('Config', 'Key', body.key, { Value: body.value });
         return _ok({ success: true });
 
+      case 'addCash':
+        var addCashCurrent = Number(_getConfigValue('cash_on_hand') || 0);
+        var addCashNew     = addCashCurrent + Number(body.amount);
+        appendRow('CashLog', {
+          Timestamp:     new Date().toISOString(),
+          Date:          body.date,
+          Type:          'topup',
+          Amount:        Number(body.amount),
+          RunningBalance:addCashNew,
+          Notes:         (body.source || '') + (body.notes ? ' · ' + body.notes : ''),
+          LinkedID:      '',
+          AddedBy:       email
+        });
+        _setConfigValue('cash_on_hand', addCashNew);
+        return _ok({ success: true, newBalance: addCashNew });
+
+      case 'payCreditCard':
+        var payCards = getRows('CreditCards');
+        var payCard  = null;
+        for (var pi = 0; pi < payCards.length; pi++) {
+          if (payCards[pi].ID === body.cardId) { payCard = payCards[pi]; break; }
+        }
+        if (!payCard) return _error('Card not found: ' + body.cardId);
+        var oldCardBal  = Number(payCard.Balance || 0);
+        var newCardBal  = Math.max(0, oldCardBal - Number(body.amount));
+        var cardUpdates = { Balance: newCardBal };
+        if (newCardBal <= 0) cardUpdates.PastDue = false;
+        updateRowById('CreditCards', 'ID', body.cardId, cardUpdates);
+        var payCashNow = Number(_getConfigValue('cash_on_hand') || 0);
+        var payCashNew = payCashNow - Number(body.amount);
+        appendRow('CashLog', {
+          Timestamp:     new Date().toISOString(),
+          Date:          body.date,
+          Type:          'pay_card',
+          Amount:        Number(body.amount),
+          RunningBalance:payCashNew,
+          Notes:         body.notes || ('Payment to ' + payCard.Name),
+          LinkedID:      body.cardId,
+          AddedBy:       email
+        });
+        _setConfigValue('cash_on_hand', payCashNew);
+        return _ok({ success: true, newCashBalance: payCashNew, newCardBalance: newCardBal, pastDueCleared: newCardBal <= 0 });
+
+      case 'payLoanDebit':
+        var loanRows = getRows('BankLoans');
+        var theLoan  = null;
+        for (var li = 0; li < loanRows.length; li++) {
+          if (loanRows[li].ID === body.loanId) { theLoan = loanRows[li]; break; }
+        }
+        if (!theLoan) return _error('Loan not found: ' + body.loanId);
+        var loanAmt      = Number(theLoan.MonthlyPayment || 0);
+        var loanCashNow  = Number(_getConfigValue('cash_on_hand') || 0);
+        var loanCashNew  = loanCashNow - loanAmt;
+        appendRow('CashLog', {
+          Timestamp:     new Date().toISOString(),
+          Date:          body.date,
+          Type:          'loan_debit',
+          Amount:        loanAmt,
+          RunningBalance:loanCashNew,
+          Notes:         body.notes || (theLoan.Bank + ' ' + theLoan.Type + ' auto-debit'),
+          LinkedID:      body.loanId,
+          AddedBy:       email
+        });
+        _setConfigValue('cash_on_hand', loanCashNew);
+        return _ok({ success: true, newCashBalance: loanCashNew, amountDebited: loanAmt });
+
       default:
         return _error('Unknown action: ' + action);
     }
@@ -152,6 +223,18 @@ function _getDashboard() {
     renovationOnHand:    Number(configMap['renovation_on_hand'] || 570000),
     generatedAt:         new Date().toISOString()
   };
+}
+
+function _getConfigValue(key) {
+  var rows = getRows('Config');
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].Key === key) return rows[i].Value;
+  }
+  return null;
+}
+
+function _setConfigValue(key, value) {
+  updateRowById('Config', 'Key', key, { Value: String(value) });
 }
 
 function _ok(data) {
