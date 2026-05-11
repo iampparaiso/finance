@@ -2,7 +2,7 @@ import { get, post } from './api.js';
 import { peso, dateStr, pct } from './format.js';
 
 export async function renderRenovation(container) {
-  const [rows, config] = await Promise.all([get('getRenovation'), get('getConfig')]);
+  const [rows, config, cards] = await Promise.all([get('getRenovation'), get('getConfig'), get('getCards')]);
   const configMap = {};
   config.forEach(r => { configMap[r.Key] = r.Value; });
 
@@ -62,7 +62,20 @@ export async function renderRenovation(container) {
             <option>Furniture</option><option>Fixtures</option><option>Miscellaneous</option>
           </select>
         </div>
-        <div class="form-group"><label>Payment Method</label><input type="text" id="reno-payment" placeholder="e.g. BDO CC, Cash"></div>
+        <div class="form-group">
+          <label>Payment Method</label>
+          <select id="reno-payment">
+            <option value="cash">Cash</option>
+            ${(cards || []).map(c => `<option value="card-${c.ID}">${c.Name}</option>`).join('')}
+            <option value="other">Other / TBD</option>
+          </select>
+        </div>
+        <div class="form-group" id="reno-card-group" style="display:none">
+          <label>Card</label>
+          <select id="reno-card">
+            ${(cards || []).map(c => `<option value="${c.ID}">${c.Name}</option>`).join('')}
+          </select>
+        </div>
       </div>
       <button class="btn btn-primary" id="reno-submit">Log Expense</button>
       <span id="reno-msg" style="margin-left:var(--sp3);font-size:0.85rem;color:var(--muted)"></span>
@@ -96,14 +109,20 @@ export async function renderRenovation(container) {
   `;
 
   document.getElementById('reno-submit').addEventListener('click', async () => {
-    const msg = document.getElementById('reno-msg');
+    const msg         = document.getElementById('reno-msg');
+    const payVal      = document.getElementById('reno-payment').value;
+    const isCash      = payVal === 'cash';
+    const isCard      = payVal.startsWith('card-');
+    const cardId      = isCard ? document.getElementById('reno-card').value : '';
+    const methodLabel = isCash ? 'cash' : isCard ? 'card' : 'other';
     try {
       await post('logRenovation', {
         date:          document.getElementById('reno-date').value,
         description:   document.getElementById('reno-desc').value,
         amount:        Number(document.getElementById('reno-amount').value),
         category:      document.getElementById('reno-cat').value,
-        paymentMethod: document.getElementById('reno-payment').value
+        paymentMethod: methodLabel,
+        cardId:        cardId
       });
       msg.textContent = '✓ Logged!';
       msg.style.color = 'var(--ok)';
@@ -111,6 +130,15 @@ export async function renderRenovation(container) {
     } catch (err) {
       msg.textContent = 'Error: ' + err.message;
       msg.style.color = 'var(--danger)';
+    }
+  });
+
+  const renoPaySel  = document.getElementById('reno-payment');
+  const renoCardGrp = document.getElementById('reno-card-group');
+  renoPaySel.addEventListener('change', () => {
+    renoCardGrp.style.display = renoPaySel.value.startsWith('card-') ? 'block' : 'none';
+    if (renoPaySel.value.startsWith('card-')) {
+      document.getElementById('reno-card').value = renoPaySel.value.replace('card-', '');
     }
   });
 }
