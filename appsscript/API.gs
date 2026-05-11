@@ -149,6 +149,40 @@ function doPost(e) {
         updateRowById('Config', 'Key', body.key, { Value: body.value });
         return _ok({ success: true });
 
+      case 'deleteRenovation':
+        var renoSheet2 = getSheet('Renovation');
+        var renoData2  = renoSheet2.getDataRange().getValues();
+        var renoHdrs   = renoData2[0];
+        var renoTsCol  = renoHdrs.indexOf('Timestamp');
+        var renoAmtCol = renoHdrs.indexOf('Amount');
+        var renoPayCol = renoHdrs.indexOf('PaymentMethod');
+        var renoDeleted = false;
+        for (var ri = 1; ri < renoData2.length; ri++) {
+          if (String(renoData2[ri][renoTsCol]) === String(body.id)) {
+            var delAmt = Number(renoData2[ri][renoAmtCol]);
+            var delPay = String(renoData2[ri][renoPayCol]);
+            renoSheet2.deleteRow(ri + 1);
+            renoDeleted = true;
+            if (delPay === 'cash') {
+              var revCashNow = Number(_getConfigValue('cash_on_hand') || 0);
+              var revCashNew = revCashNow + delAmt;
+              appendRow('CashLog', {
+                Timestamp:     new Date().toISOString(),
+                Date:          body.date || new Date().toISOString().slice(0, 10),
+                Type:          'reversal',
+                Amount:        delAmt,
+                RunningBalance:revCashNew,
+                Notes:         'Deleted renovation entry',
+                LinkedID:      body.id,
+                AddedBy:       email
+              });
+              _setConfigValue('cash_on_hand', revCashNew);
+            }
+            break;
+          }
+        }
+        return renoDeleted ? _ok({ success: true }) : _error('Renovation row not found');
+
       case 'addCash':
         var addCashCurrent = Number(_getConfigValue('cash_on_hand') || 0);
         var addCashNew     = addCashCurrent + Number(body.amount);

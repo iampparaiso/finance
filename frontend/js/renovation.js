@@ -93,7 +93,7 @@ export async function renderRenovation(container) {
     ${rows.length > 0 ? `
     <div class="section-title">Expense Log</div>
     <table class="data-table">
-      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Payment</th><th style="text-align:right">Amount</th></tr></thead>
+      <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Payment</th><th style="text-align:right">Amount</th><th></th></tr></thead>
       <tbody>
         ${[...rows].reverse().map(r => `
           <tr>
@@ -102,6 +102,7 @@ export async function renderRenovation(container) {
             <td><span class="badge info">${r.Category}</span></td>
             <td style="color:var(--muted)">${r.PaymentMethod}</td>
             <td class="mono" style="text-align:right;color:var(--warn)">${peso(r.Amount)}</td>
+            <td style="text-align:center"><button class="reno-del-btn" data-row-id="${r.Timestamp}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:2px 6px" title="Delete">✕</button></td>
           </tr>
         `).join('')}
       </tbody>
@@ -131,6 +132,19 @@ export async function renderRenovation(container) {
       msg.textContent = 'Error: ' + err.message;
       msg.style.color = 'var(--danger)';
     }
+  });
+
+  document.querySelectorAll('.reno-del-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Delete this renovation entry?')) return;
+      btn.disabled = true; btn.textContent = '…';
+      const res = await post('deleteRenovation', {
+        id:   btn.dataset.rowId,
+        date: new Date().toISOString().slice(0, 10)
+      });
+      if (res) renderRenovation(container);
+      else { btn.disabled = false; btn.textContent = '✕'; }
+    });
   });
 
   const renoPaySel  = document.getElementById('reno-payment');
