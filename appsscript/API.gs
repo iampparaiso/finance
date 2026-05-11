@@ -244,6 +244,14 @@ function _getDashboard() {
   var totalSubs     = subs.reduce(function(s, sub) { return s + Number(sub.Amount); }, 0);
   var totalObligations = totalLoanPayments + totalInstallments + totalBills + totalSubs;
 
+  var cashLog     = getRows('CashLog');
+  var cashOnHand  = Number(_getConfigValue('cash_on_hand') || 0);
+
+  var thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+  var thirtyStr = thirtyDaysAgo.toISOString().slice(0, 10);
+  var recentCashLog = cashLog.filter(function(r) { return String(r.Date) >= thirtyStr; });
+
   var renovationSpent = renovation.reduce(function(s, r) { return s + Number(r.Amount); }, 0);
   var configMap = {};
   config.forEach(function(r) { configMap[r.Key] = r.Value; });
@@ -255,16 +263,19 @@ function _getDashboard() {
     totalMonthlyIncome:  totalMonthlyIncome,
     totalObligations:    totalObligations,
     breakdown: {
-      loans:        totalLoanPayments,
-      installments: totalInstallments,
-      bills:        totalBills,
-      subscriptions:totalSubs
+      loans:         totalLoanPayments,
+      installments:  totalInstallments,
+      bills:         totalBills,
+      subscriptions: totalSubs
     },
     netAfterObligations: totalMonthlyIncome - totalObligations,
-    pastDueCards:   cards.filter(function(c) { return c.PastDue == true || c.PastDue === 'TRUE'; }),
+    pastDueCards:        cards.filter(function(c) { return c.PastDue == true || c.PastDue === 'TRUE'; }),
     renovationSpent:     renovationSpent,
     renovationTarget:    Number(configMap['renovation_target'] || 1200000),
     renovationOnHand:    Number(configMap['renovation_on_hand'] || 570000),
+    cashOnHand:          cashOnHand,
+    recentCashLog:       recentCashLog,
+    installments:        installs,
     generatedAt:         new Date().toISOString()
   };
 }
