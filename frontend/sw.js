@@ -1,4 +1,4 @@
-const CACHE = 'finance-os-v4';
+const CACHE = 'finance-os-v5';
 const PRECACHE = [
   '/finance/',
   '/finance/index.html',
