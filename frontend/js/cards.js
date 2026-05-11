@@ -1,5 +1,6 @@
 import { get } from './api.js';
 import { peso, dateStr, daysUntil, dueBadge, pct } from './format.js';
+import { openPayCardModal } from './cash-tracker.js';
 
 const CARD_PERKS = {
   RCBC: [
@@ -148,6 +149,7 @@ export async function renderCards(container) {
         <div class="stat-sub">${allUnbilled.length} transactions from Spend Log</div>
       </div>` : ''}
     </div>
+    ${_priorityQueue(cards)}
     ${cards.map(c => _cardRow(c, spendRows)).join('')}
   `;
 
@@ -156,6 +158,57 @@ export async function renderCards(container) {
       h.closest('.card-row')?.querySelector('.card-detail')?.classList.toggle('open');
     });
   });
+
+  container.querySelectorAll('.pq-pay-btn').forEach(btn => {
+    btn.addEventListener('click', () => openPayCardModal(cards, btn.dataset.cardId));
+  });
+}
+
+function _priorityQueue(cards) {
+  const now        = new Date();
+  const sevenDays  = new Date(now);
+  sevenDays.setDate(now.getDate() + 7);
+
+  const withBalance = cards.filter(c => Number(c.Balance) > 0 || c.PastDue === true || c.PastDue === 'TRUE');
+  if (!withBalance.length) return '';
+
+  const sorted = [...withBalance].sort((a, b) => {
+    const aPast = a.PastDue === true || a.PastDue === 'TRUE';
+    const bPast = b.PastDue === true || b.PastDue === 'TRUE';
+    if (aPast && !bPast) return -1;
+    if (!aPast && bPast) return 1;
+    if (aPast && bPast) return Number(b.Balance) - Number(a.Balance);
+    const aDate = a.DueDate ? new Date(a.DueDate) : new Date('2099-12-31');
+    const bDate = b.DueDate ? new Date(b.DueDate) : new Date('2099-12-31');
+    return aDate - bDate;
+  });
+
+  return `
+    <div class="section-title">Pay These First</div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r2);margin-bottom:var(--sp5);overflow:hidden">
+      ${sorted.map((c, idx) => {
+        const isPast  = c.PastDue === true || c.PastDue === 'TRUE';
+        const dueDate = c.DueDate ? new Date(c.DueDate) : null;
+        const urgent  = dueDate && dueDate <= sevenDays;
+        const label   = isPast ? '<span class="badge danger">OVERDUE</span>' :
+                        (dueDate ? `due ${dueDate.toLocaleDateString('en-PH',{month:'short',day:'numeric'})}` : '');
+        return `<div style="display:flex;justify-content:space-between;align-items:center;padding:12px var(--sp3);border-bottom:1px solid var(--border)">
+          <div style="display:flex;align-items:center;gap:var(--sp2)">
+            <span style="color:var(--muted);font-size:0.8rem;width:18px">${idx+1}.</span>
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${c.Color}"></span>
+            <div>
+              <div style="font-size:0.88rem;font-weight:600">${c.Name}${c.Last4 ? ' ••' + c.Last4 : ''}</div>
+              <div style="font-size:0.75rem;color:var(--muted)">${label}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:var(--sp2)">
+            <span class="mono ${isPast ? 'danger' : urgent ? 'warn' : ''}" style="font-weight:700">${peso(c.Balance)}</span>
+            <button class="pq-pay-btn btn" data-card-id="${c.ID}" style="font-size:0.75rem;padding:4px 10px${isPast?';background:var(--danger);color:#fff;border-color:var(--danger)':''}">Pay Now</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
 }
 
 function _cardRow(c, spendRows) {
