@@ -10,8 +10,7 @@ export async function renderIncome(container) {
     <div id="income-content"><div class="loading-spinner">Loading...</div></div>
   `;
 
-  const dashRes = await get('getDashboard');
-  const dash = dashRes.ok ? dashRes.data : {};
+  const dash = await get('getDashboard') || {};
 
   const totalIncome = dash.totalMonthlyIncome || 559000;
   const totalObligations = dash.totalObligations || 0;

@@ -110,8 +110,7 @@ function _perksSection(perks) {
 export async function renderCards(container) {
   container.innerHTML = '<div class="loading-spinner">Loading...</div>';
 
-  const [cards, logRes] = await Promise.all([get('getCards'), get('getSpendLog')]);
-  const spendRows = (logRes.ok && logRes.data) ? logRes.data : [];
+  const [cards, spendRows] = await Promise.all([get('getCards'), get('getSpendLog')]);
 
   const totalLimit   = cards.reduce((s,c) => s + Number(c.Limit), 0);
   const totalBalance = cards.reduce((s,c) => s + Number(c.Balance), 0);

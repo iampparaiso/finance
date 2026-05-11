@@ -57,9 +57,9 @@ export async function renderSpendLog(container) {
     <div id="sl-content"><div class="loading-spinner">Loading...</div></div>
   `;
 
-  const [logRes, cardsRes] = await Promise.all([get('getSpendLog'), get('getCards')]);
+  const [logData, cardsData] = await Promise.all([get('getSpendLog'), get('getCards')]);
 
-  const cards = (cardsRes.ok && cardsRes.data) ? cardsRes.data : [];
+  const cards = cardsData || [];
   const cardMap = {};
   cards.forEach(c => { cardMap[c.ID] = c; });
 
@@ -99,12 +99,12 @@ export async function renderSpendLog(container) {
 
   const content = document.getElementById('sl-content');
 
-  if (!logRes.ok || !logRes.data || !logRes.data.length) {
+  if (!logData || !logData.length) {
     content.innerHTML = '<p class="muted" style="text-align:center;padding:var(--sp7)">No expenses logged yet.</p>';
     return;
   }
 
-  const rows      = [...logRes.data].reverse();
+  const rows      = [...logData].reverse();
   const now       = new Date();
   const thisMonth = now.toISOString().slice(0, 7);
 
