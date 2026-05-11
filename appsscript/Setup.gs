@@ -107,3 +107,42 @@ function _batchAppend(ss, sheetName, rows, headers) {
   if (rows.length === 0) return;
   sheet.getRange(2, 1, rows.length, headers.length).setValues(rows);
 }
+
+// Run once on the existing production spreadsheet to add new infrastructure
+function migrateExistingSheet() {
+  var ss = getSpreadsheet();
+
+  // 1. Add CashLog sheet if missing
+  if (!ss.getSheetByName('CashLog')) {
+    _createSheet(ss, 'CashLog', ['Timestamp','Date','Type','Amount','RunningBalance','Notes','LinkedID','AddedBy']);
+    Logger.log('Created CashLog sheet');
+  } else {
+    Logger.log('CashLog already exists — skipped');
+  }
+
+  // 2. Add cash_on_hand to Config if missing
+  var configSheet = ss.getSheetByName('Config');
+  var configData  = configSheet.getDataRange().getValues();
+  var keyCol      = configData[0].indexOf('Key');
+  var hasKey      = configData.slice(1).some(function(r) { return r[keyCol] === 'cash_on_hand'; });
+  if (!hasKey) {
+    configSheet.appendRow(['cash_on_hand', '0', 'Running cash on hand balance']);
+    Logger.log('Added cash_on_hand config key');
+  } else {
+    Logger.log('cash_on_hand already exists — skipped');
+  }
+
+  // 3. Add CardID column to Renovation sheet if missing
+  var renoSheet   = ss.getSheetByName('Renovation');
+  var renoHeaders = renoSheet.getRange(1, 1, 1, renoSheet.getLastColumn()).getValues()[0];
+  if (renoHeaders.indexOf('CardID') === -1) {
+    var newCol = renoSheet.getLastColumn() + 1;
+    renoSheet.getRange(1, newCol).setValue('CardID');
+    renoSheet.getRange(1, newCol).setBackground('#1a1a2e').setFontColor('#ffffff').setFontWeight('bold');
+    Logger.log('Added CardID column to Renovation sheet');
+  } else {
+    Logger.log('CardID already in Renovation — skipped');
+  }
+
+  Logger.log('Migration complete.');
+}
