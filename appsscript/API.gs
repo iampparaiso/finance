@@ -47,19 +47,34 @@ function doPost(e) {
   try {
     switch (action) {
       case 'logSpend':
-        var ts = new Date().toISOString();
+        var slTs = new Date().toISOString();
         appendRow('SpendLog', {
-          Timestamp:   ts,
+          Timestamp:   slTs,
           Date:        body.date,
           Description: body.description,
           Amount:      body.amount,
           Category:    body.category,
-          CardID:      body.cardId,
+          CardID:      body.cardId || '',
           Month:       (body.date || '').slice(0, 7),
           Notes:       body.notes || '',
           AddedBy:     email
         });
-        return _ok({ success: true, id: ts });
+        if (!body.cardId) {
+          var slCashNow = Number(_getConfigValue('cash_on_hand') || 0);
+          var slCashNew = slCashNow - Number(body.amount);
+          appendRow('CashLog', {
+            Timestamp:     slTs,
+            Date:          body.date,
+            Type:          'spend_cash',
+            Amount:        Number(body.amount),
+            RunningBalance:slCashNew,
+            Notes:         body.description || '',
+            LinkedID:      '',
+            AddedBy:       email
+          });
+          _setConfigValue('cash_on_hand', slCashNew);
+        }
+        return _ok({ success: true, id: slTs });
 
       case 'deleteSpend':
         var deleted = _deleteSpendRow(body.id);
@@ -67,16 +82,45 @@ function doPost(e) {
 
 
       case 'logRenovation':
+        var renoTs = new Date().toISOString();
         appendRow('Renovation', {
-          Timestamp:     new Date().toISOString(),
+          Timestamp:     renoTs,
           Date:          body.date,
           Description:   body.description,
           Amount:        body.amount,
           Category:      body.category,
           PaymentMethod: body.paymentMethod,
+          CardID:        body.cardId || '',
           Receipt:       body.receipt || '',
           AddedBy:       email
         });
+        if (body.paymentMethod === 'cash') {
+          var renoCashNow = Number(_getConfigValue('cash_on_hand') || 0);
+          var renoCashNew = renoCashNow - Number(body.amount);
+          appendRow('CashLog', {
+            Timestamp:     renoTs,
+            Date:          body.date,
+            Type:          'reno_cash',
+            Amount:        Number(body.amount),
+            RunningBalance:renoCashNew,
+            Notes:         body.description || 'Renovation',
+            LinkedID:      '',
+            AddedBy:       email
+          });
+          _setConfigValue('cash_on_hand', renoCashNew);
+        } else if (body.paymentMethod === 'card' && body.cardId) {
+          appendRow('SpendLog', {
+            Timestamp:   renoTs,
+            Date:        body.date,
+            Description: body.description || 'Renovation',
+            Amount:      body.amount,
+            Category:    'Renovation',
+            CardID:      body.cardId,
+            Month:       (body.date || '').slice(0, 7),
+            Notes:       'Renovation',
+            AddedBy:     email
+          });
+        }
         return _ok({ success: true });
 
       case 'logEmergencyFund':
