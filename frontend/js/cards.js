@@ -1,4 +1,4 @@
-import { get } from './api.js';
+import { get, post } from './api.js';
 import { peso, dateStr, daysUntil, dueBadge, pct } from './format.js';
 import { openPayCardModal } from './cash-tracker.js';
 
@@ -108,6 +108,59 @@ function _perksSection(perks) {
     </div>`;
 }
 
+function openUpdateSOAModal(card, onSuccess) {
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:1000;display:flex;align-items:center;justify-content:center';
+  const isPastDue = card.PastDue === true || card.PastDue === 'TRUE';
+  const dueDateVal = card.DueDate ? String(card.DueDate).slice(0, 10) : '';
+  overlay.innerHTML = `
+    <div style="background:var(--bg);border:1px solid var(--border);border-radius:var(--r2);padding:var(--sp5);width:min(380px,90vw);max-height:90vh;overflow-y:auto">
+      <div style="font-weight:700;font-size:1.1rem;margin-bottom:var(--sp4)">Update SOA — ${card.Name}</div>
+      <div style="font-size:0.8rem;color:var(--muted);margin-bottom:var(--sp4)">Enter the figures from your new Statement of Account.</div>
+      <div style="margin-bottom:var(--sp3)">
+        <label style="font-size:0.8rem;color:var(--muted);display:block;margin-bottom:4px">New Balance (₱)</label>
+        <input type="number" id="soa-balance" value="${Number(card.Balance)}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r1);background:var(--surface);color:var(--text);font-size:1rem;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:var(--sp3)">
+        <label style="font-size:0.8rem;color:var(--muted);display:block;margin-bottom:4px">New Due Date</label>
+        <input type="date" id="soa-due" value="${dueDateVal}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r1);background:var(--surface);color:var(--text);font-size:1rem;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:var(--sp4)">
+        <label style="display:flex;align-items:center;gap:var(--sp2);cursor:pointer;font-size:0.88rem">
+          <input type="checkbox" id="soa-pastdue" ${isPastDue ? 'checked' : ''} style="width:16px;height:16px">
+          Mark as Past Due / Overdue
+        </label>
+      </div>
+      <div style="display:flex;gap:var(--sp2)">
+        <button id="soa-submit" class="btn btn-primary" style="flex:1">Update Card</button>
+        <button id="soa-cancel" class="btn">Cancel</button>
+      </div>
+      <div id="soa-msg" style="margin-top:var(--sp2);font-size:0.8rem;color:var(--muted)"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.getElementById('soa-cancel').addEventListener('click', () => overlay.remove());
+  document.getElementById('soa-submit').addEventListener('click', async () => {
+    const msg     = document.getElementById('soa-msg');
+    const balance = Number(document.getElementById('soa-balance').value);
+    const dueDate = document.getElementById('soa-due').value;
+    const pastDue = document.getElementById('soa-pastdue').checked;
+    if (isNaN(balance) || balance < 0) {
+      msg.textContent = 'Enter a valid balance.'; msg.style.color = 'var(--danger)'; return;
+    }
+    const btn = document.getElementById('soa-submit');
+    btn.disabled = true; btn.textContent = 'Saving…';
+    try {
+      await post('updateCard', { cardId: card.ID, updates: { Balance: balance, DueDate: dueDate, PastDue: pastDue } });
+      overlay.remove();
+      onSuccess();
+    } catch (err) {
+      msg.textContent = 'Error: ' + err.message; msg.style.color = 'var(--danger)';
+      btn.disabled = false; btn.textContent = 'Update Card';
+    }
+  });
+}
+
 export async function renderCards(container) {
   container.innerHTML = '<div class="loading-spinner">Loading...</div>';
 
@@ -161,6 +214,14 @@ export async function renderCards(container) {
 
   container.querySelectorAll('.pq-pay-btn').forEach(btn => {
     btn.addEventListener('click', () => openPayCardModal(cards, btn.dataset.cardId));
+  });
+
+  container.querySelectorAll('.soa-update-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const card = cards.find(c => c.ID === btn.dataset.cardId);
+      if (card) openUpdateSOAModal(card, () => renderCards(container));
+    });
   });
 }
 
@@ -251,6 +312,9 @@ function _cardRow(c, spendRows) {
       </div>
       ${_unbilledSection(c, spendRows)}
       ${_perksSection(perks)}
+      <div style="margin-top:var(--sp3);padding-top:var(--sp3);border-top:1px solid var(--border)">
+        <button class="soa-update-btn btn" data-card-id="${c.ID}" style="width:100%;font-size:0.8rem">Update SOA / New Statement</button>
+      </div>
     </div>
   </div>`;
 }
