@@ -61,12 +61,31 @@ async function loadModule(name) {
     main.innerHTML = `<div class="error-state">Unknown module: ${name}</div>`;
     return;
   }
-  main.innerHTML = '<div class="loading-spinner">Loading...</div>';
+  main.innerHTML = _skeleton(name);
+  main.classList.remove('tab-entering');
+  void main.offsetWidth;
+  main.classList.add('tab-entering');
   try {
     await MODULES[name](main);
+    main.classList.remove('tab-entering');
+    void main.offsetWidth;
+    main.classList.add('tab-entering');
   } catch (err) {
     main.innerHTML = `<div class="error-state">Error: ${err.message}</div>`;
   }
+}
+
+function _skeleton(name) {
+  const statRow = `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:var(--sp4);margin-bottom:var(--sp5)">${[1,2,3,4].map(() => '<div class="skeleton-block" style="height:90px"></div>').join('')}</div>`;
+  if (name === 'cards') {
+    return statRow + [1,2,3].map(() => '<div class="skeleton-block" style="height:72px;margin-bottom:var(--sp3)"></div>').join('');
+  }
+  if (name === 'spend-log') {
+    return statRow + '<div class="skeleton-block" style="height:180px;margin-bottom:var(--sp5)"></div>' +
+      [1,2,3,4,5].map(() => '<div class="skeleton-block" style="height:44px;margin-bottom:4px"></div>').join('');
+  }
+  return statRow + '<div class="skeleton-block" style="height:200px;margin-bottom:var(--sp4)"></div>' +
+    '<div class="skeleton-block" style="height:160px"></div>';
 }
 
 if ('serviceWorker' in navigator) {

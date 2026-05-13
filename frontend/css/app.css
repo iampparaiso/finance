@@ -90,8 +90,8 @@
 .card-name { font-weight: 600; font-size: 0.95rem; }
 .card-sub  { font-size: 0.75rem; color: var(--muted); }
 .card-balance { font-family: var(--font-mono); font-size: 1.1rem; font-weight: 700; }
-.card-detail { padding: var(--sp4); border-top: 1px solid var(--border); display: none; }
-.card-detail.open { display: block; }
+.card-detail { padding: var(--sp4); border-top: 1px solid var(--border); overflow: hidden; max-height: 0; padding-top: 0; padding-bottom: 0; transition: max-height 280ms ease-in-out, padding 200ms ease-in-out; }
+.card-detail.open { padding-top: var(--sp4); padding-bottom: var(--sp4); }
 .detail-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: var(--sp3); }
 .detail-item .dl { font-size: 0.7rem; color: var(--muted); text-transform: uppercase; margin-bottom: 2px; }
 .detail-item .dv { font-size: 0.9rem; font-weight: 600; }
@@ -189,6 +189,34 @@
 .deal-filter { padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: transparent; color: var(--muted2); cursor: pointer; font-size: 0.78rem; transition: all var(--t1); }
 .deal-filter:hover { border-color: var(--acc); color: var(--acc); }
 .deal-filter.active { background: var(--acc); color: #fff; border-color: var(--acc); }
+
+/* === SKELETON SCREENS === */
+.skeleton-block {
+  background: var(--surface);
+  border-radius: var(--r2);
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.skeleton-block::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.06) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+
+/* === TAB TRANSITIONS === */
+.tab-entering { animation: tabEnter 150ms ease-out forwards; }
+@keyframes tabEnter {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
 /* === INLINE EDIT === */
 .notes-edit-btn { background: none; border: none; cursor: pointer; color: var(--muted); font-size: 0.75rem; padding: 0 4px; opacity: 0; transition: opacity var(--t1); vertical-align: middle; }
