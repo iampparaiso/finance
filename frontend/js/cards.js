@@ -234,6 +234,13 @@ export async function renderCards(container) {
     });
   });
 
+  setTimeout(() => {
+    container.querySelectorAll('.badge.danger').forEach(b => {
+      b.classList.add('pulse');
+      b.addEventListener('animationend', () => b.classList.remove('pulse'), { once: true });
+    });
+  }, 100);
+
   container.querySelectorAll('.pq-pay-btn').forEach(btn => {
     btn.addEventListener('click', () => openPayCardModal(cards, btn.dataset.cardId));
   });
