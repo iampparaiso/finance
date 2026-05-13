@@ -122,6 +122,10 @@ function openUpdateSOAModal(card, onSuccess) {
         <input type="number" id="soa-balance" value="${Number(card.Balance)}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r1);background:var(--surface);color:var(--text);font-size:1rem;box-sizing:border-box">
       </div>
       <div style="margin-bottom:var(--sp3)">
+        <label style="font-size:0.8rem;color:var(--muted);display:block;margin-bottom:4px">Available Credit (₱) — from SOA</label>
+        <input type="number" id="soa-avail" value="${Number(card.AvailableCredit) || ''}" placeholder="e.g. 450000" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r1);background:var(--surface);color:var(--text);font-size:1rem;box-sizing:border-box">
+      </div>
+      <div style="margin-bottom:var(--sp3)">
         <label style="font-size:0.8rem;color:var(--muted);display:block;margin-bottom:4px">New Due Date</label>
         <input type="date" id="soa-due" value="${dueDateVal}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r1);background:var(--surface);color:var(--text);font-size:1rem;box-sizing:border-box">
       </div>
@@ -155,7 +159,10 @@ function openUpdateSOAModal(card, onSuccess) {
     const btn = document.getElementById('soa-submit');
     btn.disabled = true; btn.textContent = 'Saving…';
     try {
-      await post('updateCard', { cardId: card.ID, updates: { Balance: balance, DueDate: dueDate, PastDue: pastDue } });
+      const availCredit = parseFloat(document.getElementById('soa-avail').value);
+      const updates = { Balance: balance, DueDate: dueDate, PastDue: pastDue };
+      if (!isNaN(availCredit) && availCredit >= 0) updates.AvailableCredit = availCredit;
+      await post('updateCard', { cardId: card.ID, updates });
       overlay.remove();
       onSuccess();
     } catch (err) {
@@ -332,7 +339,10 @@ function _cardRow(c, spendRows, allInstalls) {
     <div class="util-wrap">
       <div style="display:flex;justify-content:space-between;font-size:0.7rem;color:var(--muted);margin-bottom:4px">
         <span>Utilization ${utilPct}%</span>
-        <span>${peso(Number(c.Limit)-Number(c.Balance))} available</span>
+        ${Number(c.AvailableCredit) > 0
+          ? `<span>${peso(Number(c.AvailableCredit))} available <span style="font-size:0.65rem;color:var(--muted)">(SOA)</span></span>`
+          : `<span style="color:var(--muted)">${peso(Number(c.Limit)-Number(c.Balance))} available <span style="font-size:0.65rem">(est.)</span></span>`
+        }
       </div>
       <div class="util-bar"><div class="util-fill" style="width:${utilPct}%;background:${fillColor}"></div></div>
     </div>
@@ -340,6 +350,10 @@ function _cardRow(c, spendRows, allInstalls) {
       <div class="detail-grid">
         <div class="detail-item"><div class="dl">Credit Limit</div><div class="dv">${peso(c.Limit)}</div></div>
         <div class="detail-item"><div class="dl">Balance</div><div class="dv ${c.PastDue?'danger':'warn'}">${peso(c.Balance)}</div></div>
+        ${Number(c.AvailableCredit) > 0
+          ? `<div class="detail-item"><div class="dl">Available Credit</div><div class="dv ok">${peso(c.AvailableCredit)}</div></div>`
+          : `<div class="detail-item"><div class="dl">Available Credit</div><div class="dv muted" style="font-size:0.8rem">${peso(Number(c.Limit)-Number(c.Balance))} (est.)</div></div>`
+        }
         <div class="detail-item"><div class="dl">Statement Cut</div><div class="dv">${c.StatementCutDay}th</div></div>
         <div class="detail-item"><div class="dl">Due Date</div><div class="dv">${c.DueDate ? dateStr(c.DueDate) : '—'}</div></div>
         <div class="detail-item"><div class="dl">Interest Rate</div><div class="dv danger">${(Number(c.InterestRate)*100).toFixed(0)}%/mo</div></div>
