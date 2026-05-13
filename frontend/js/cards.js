@@ -222,14 +222,14 @@ export async function renderCards(container) {
       const detail = h.closest('.card-row')?.querySelector('.card-detail');
       if (!detail) return;
       if (detail.classList.contains('open')) {
+        detail.classList.remove('open');
         detail.style.maxHeight = detail.scrollHeight + 'px';
         requestAnimationFrame(() => { detail.style.maxHeight = '0'; });
         detail.addEventListener('transitionend', () => { detail.style.maxHeight = ''; }, { once: true });
-        detail.classList.remove('open');
       } else {
         detail.classList.add('open');
         detail.style.maxHeight = detail.scrollHeight + 'px';
-        detail.addEventListener('transitionend', () => { detail.style.maxHeight = ''; }, { once: true });
+        detail.addEventListener('transitionend', () => { detail.style.maxHeight = 'none'; }, { once: true });
       }
     });
   });
