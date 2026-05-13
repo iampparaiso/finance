@@ -3,7 +3,7 @@ import { peso, dateStr } from './format.js';
 import { computeAlerts, renderAlertBanners } from './alerts.js';
 import { renderCashTracker, openPayCardModal } from './cash-tracker.js';
 
-const CATEGORIES = ['Food', 'Transport', 'Shopping', 'Health', 'Entertainment', 'Utilities', 'Other'];
+const CATEGORIES = ['Food', 'Groceries', 'Transport', 'Shopping', 'Health', 'Entertainment', 'Utilities', 'Other'];
 
 function _estimateDue(txDate, card) {
   if (!card) return null;

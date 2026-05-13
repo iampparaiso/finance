@@ -140,6 +140,10 @@ function openUpdateSOAModal(card, onSuccess) {
   document.body.appendChild(overlay);
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
   document.getElementById('soa-cancel').addEventListener('click', () => overlay.remove());
+  document.getElementById('soa-balance').addEventListener('input', () => {
+    const val = parseFloat(document.getElementById('soa-balance').value);
+    if (val === 0) document.getElementById('soa-pastdue').checked = false;
+  });
   document.getElementById('soa-submit').addEventListener('click', async () => {
     const msg     = document.getElementById('soa-msg');
     const balance = Number(document.getElementById('soa-balance').value);
