@@ -134,7 +134,7 @@ export async function renderRenovation(container) {
     }
   });
 
-  document.querySelectorAll('.reno-del-btn').forEach(btn => {
+  container.querySelectorAll('.reno-del-btn').forEach(btn => {
     btn.addEventListener('click', async () => {
       if (!confirm('Delete this renovation entry?')) return;
       btn.disabled = true; btn.textContent = '…';

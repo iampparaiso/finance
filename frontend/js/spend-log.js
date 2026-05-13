@@ -333,7 +333,10 @@ export async function renderSpendLog(container) {
       btn.style.opacity = '0';
       input.focus();
 
+      let _done = false;
       const save = async () => {
+        if (_done) return;
+        _done = true;
         const newNotes = input.value.trim();
         try {
           await post('updateSpend', { id: rowTs, notes: newNotes });
@@ -344,6 +347,7 @@ export async function renderSpendLog(container) {
           btn.style.opacity = '';
           showToast('Note updated.');
         } catch (err) {
+          _done = false;
           showToast('Failed to save note.', 'error');
           input.focus();
         }
@@ -351,7 +355,7 @@ export async function renderSpendLog(container) {
 
       input.addEventListener('keydown', e => {
         if (e.key === 'Enter') { e.preventDefault(); save(); }
-        if (e.key === 'Escape') { input.replaceWith(span); btn.style.opacity = ''; }
+        if (e.key === 'Escape') { _done = true; input.replaceWith(span); btn.style.opacity = ''; }
       });
       input.addEventListener('blur', save);
     });

@@ -30,14 +30,28 @@ const MODULES = {
 
 let currentModule = 'dashboard';
 
-window.onGoogleSignIn = async function(response) {
-  setToken(response.credential);
+function _tokenExp(jwt) {
+  try { return JSON.parse(atob(jwt.split('.')[1])).exp; } catch (e) { return 0; }
+}
+
+async function _enterApp(cred) {
+  setToken(cred);
   document.getElementById('auth-gate').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   await loadModule('dashboard');
+}
+
+window.onGoogleSignIn = async function(response) {
+  sessionStorage.setItem('_gis_cred', response.credential);
+  await _enterApp(response.credential);
 };
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  const stored = sessionStorage.getItem('_gis_cred');
+  if (stored && _tokenExp(stored) > Date.now() / 1000 + 60) {
+    await _enterApp(stored);
+    return;
+  }
   document.getElementById('auth-gate').classList.remove('hidden');
 
   document.getElementById('nav-tabs').addEventListener('click', async (e) => {

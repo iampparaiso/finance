@@ -157,14 +157,19 @@ export function openAddCashModal(cards, onSuccess) {
     const source = overlay.querySelector('#ac-source').value;
     if (!amount || amount <= 0) { overlay.querySelector('#ac-msg').textContent = 'Enter a valid amount'; return; }
     btn.disabled = true; btn.textContent = 'Saving…';
-    const res = await post('addCash', {
-      date:   overlay.querySelector('#ac-date').value,
-      amount, source,
-      notes:  overlay.querySelector('#ac-notes').value.trim()
-    });
-    overlay.remove();
-    if (onSuccess) onSuccess({ source, amount, newBalance: res.newBalance });
-    document.dispatchEvent(new CustomEvent('cash-updated'));
+    try {
+      const res = await post('addCash', {
+        date:   overlay.querySelector('#ac-date').value,
+        amount, source,
+        notes:  overlay.querySelector('#ac-notes').value.trim()
+      });
+      overlay.remove();
+      if (onSuccess) onSuccess({ source, amount, newBalance: res.newBalance });
+      document.dispatchEvent(new CustomEvent('cash-updated'));
+    } catch (err) {
+      overlay.querySelector('#ac-msg').textContent = 'Error: ' + err.message;
+      btn.disabled = false; btn.textContent = 'Add Cash';
+    }
   });
 }
 
@@ -212,13 +217,18 @@ export function openPayCardModal(cards, preselectedCardId) {
     const amount = parseFloat(amtInput.value);
     if (!amount || amount <= 0) { overlay.querySelector('#pc-msg').textContent = 'Enter a valid amount'; return; }
     btn.disabled = true; btn.textContent = 'Saving…';
-    await post('payCreditCard', {
-      cardId: cardSel.value, amount,
-      date:   overlay.querySelector('#pc-date').value,
-      notes:  overlay.querySelector('#pc-notes').value.trim()
-    });
-    overlay.remove();
-    document.dispatchEvent(new CustomEvent('cash-updated'));
+    try {
+      await post('payCreditCard', {
+        cardId: cardSel.value, amount,
+        date:   overlay.querySelector('#pc-date').value,
+        notes:  overlay.querySelector('#pc-notes').value.trim()
+      });
+      overlay.remove();
+      document.dispatchEvent(new CustomEvent('cash-updated'));
+    } catch (err) {
+      overlay.querySelector('#pc-msg').textContent = 'Error: ' + err.message;
+      btn.disabled = false; btn.textContent = 'Pay Card';
+    }
   });
 }
 
