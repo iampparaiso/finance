@@ -208,8 +208,7 @@ function doPost(e) {
         if (!payCard) return _error('Card not found: ' + body.cardId);
         var oldCardBal  = Number(payCard.Balance || 0);
         var newCardBal  = Math.max(0, oldCardBal - Number(body.amount));
-        var cardUpdates = { Balance: newCardBal };
-        if (newCardBal <= 0) cardUpdates.PastDue = false;
+        var cardUpdates = { Balance: newCardBal, PastDue: false };
         updateRowById('CreditCards', 'ID', body.cardId, cardUpdates);
         var payCashNow = Number(_getConfigValue('cash_on_hand') || 0);
         var payCashNew = payCashNow - Number(body.amount);
@@ -248,6 +247,68 @@ function doPost(e) {
         });
         _setConfigValue('cash_on_hand', loanCashNew);
         return _ok({ success: true, newCashBalance: loanCashNew, amountDebited: loanAmt });
+
+      case 'updateSpend':
+        var uspSheet = getSheet('SpendLog');
+        var uspData  = uspSheet.getDataRange().getValues();
+        var uspHdrs  = uspData[0];
+        var uspTsCol = uspHdrs.indexOf('Timestamp');
+        var uspNCol  = uspHdrs.indexOf('Notes');
+        if (uspTsCol === -1 || uspNCol === -1) return _error('SpendLog schema error');
+        var uspFound = false;
+        for (var ui = 1; ui < uspData.length; ui++) {
+          if (String(uspData[ui][uspTsCol]) === String(body.id)) {
+            uspSheet.getRange(ui + 1, uspNCol + 1).setValue(body.notes || '');
+            uspFound = true;
+            break;
+          }
+        }
+        return uspFound ? _ok({ success: true }) : _error('Row not found');
+
+      case 'bulkLogSpend':
+        var blsEntries = body.entries || [];
+        if (!blsEntries.length) return _error('No entries provided');
+        for (var vi = 0; vi < blsEntries.length; vi++) {
+          var ve = blsEntries[vi];
+          if (!ve.date || !ve.description || isNaN(Number(ve.amount)) || Number(ve.amount) <= 0) {
+            return _error('Invalid entry at index ' + vi + ': missing date, description, or valid amount');
+          }
+        }
+        var blsCashNow = Number(_getConfigValue('cash_on_hand') || 0);
+        var blsRunning = blsCashNow;
+        var blsIds     = [];
+        for (var bi = 0; bi < blsEntries.length; bi++) {
+          var be = blsEntries[bi];
+          Utilities.sleep(5);
+          var blsTs = new Date().toISOString();
+          appendRow('SpendLog', {
+            Timestamp:   blsTs,
+            Date:        be.date,
+            Description: be.description,
+            Amount:      be.amount,
+            Category:    be.category || 'Other',
+            CardID:      be.cardId || '',
+            Month:       (be.date || '').slice(0, 7),
+            Notes:       be.notes || '',
+            AddedBy:     email
+          });
+          if (!be.cardId) {
+            blsRunning -= Number(be.amount);
+            appendRow('CashLog', {
+              Timestamp:     blsTs,
+              Date:          be.date,
+              Type:          'spend_cash',
+              Amount:        Number(be.amount),
+              RunningBalance:blsRunning,
+              Notes:         be.description || '',
+              LinkedID:      '',
+              AddedBy:       email
+            });
+          }
+          blsIds.push(blsTs);
+        }
+        if (blsRunning !== blsCashNow) _setConfigValue('cash_on_hand', blsRunning);
+        return _ok({ success: true, count: blsIds.length, ids: blsIds });
 
       default:
         return _error('Unknown action: ' + action);
