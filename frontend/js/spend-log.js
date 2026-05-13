@@ -1,5 +1,6 @@
 import { get, post } from './api.js';
 import { peso, dateStr } from './format.js';
+import { showToast } from './toast.js';
 import { computeAlerts, renderAlertBanners } from './alerts.js';
 import { renderCashTracker, openPayCardModal } from './cash-tracker.js';
 
@@ -174,7 +175,10 @@ export async function renderSpendLog(container) {
               <td>${r.Description || '—'}</td>
               <td><span class="badge info">${r.Category || '—'}</span></td>
               <td class="muted">${card ? card.Name : (r.CardID ? r.CardID : '—')}</td>
-              <td class="muted" style="font-size:0.8rem">${r.Notes || (dueStr ? `Due ~${dueStr}` : '—')}</td>
+              <td class="muted" style="font-size:0.8rem" data-row-ts="${r.Timestamp || i}">
+                <span class="notes-text">${r.Notes || (dueStr ? `Due ~${dueStr}` : '—')}</span>
+                <button class="notes-edit-btn" title="Edit note">✏</button>
+              </td>
               <td class="mono" style="text-align:right;font-weight:600">${peso(parseFloat(r.Amount || 0))}</td>
               <td style="text-align:center"><button class="sl-del-btn" data-row-id="${r.Timestamp || i}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:2px 6px" title="Delete">✕</button></td>
             </tr>`;
@@ -188,10 +192,58 @@ export async function renderSpendLog(container) {
     btn.addEventListener('click', async () => {
       const rowId = btn.dataset.rowId;
       if (!confirm('Delete this transaction?')) return;
+      const row = btn.closest('tr');
       btn.disabled = true; btn.textContent = '…';
+      row.classList.add('sl-row-removing');
       const res = await post('deleteSpend', { id: rowId });
-      if (res) renderSpendLog(container);
-      else { btn.disabled = false; btn.textContent = '✕'; }
+      if (res) {
+        setTimeout(() => renderSpendLog(container), 200);
+      } else {
+        row.classList.remove('sl-row-removing');
+        btn.disabled = false; btn.textContent = '✕';
+        showToast('Could not delete entry.', 'error');
+      }
+    });
+  });
+
+  content.querySelectorAll('.notes-edit-btn').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      const td      = btn.closest('td');
+      const span    = td.querySelector('.notes-text');
+      const rowTs   = td.dataset.rowTs;
+      const current = span.textContent;
+
+      const input = document.createElement('input');
+      input.className = 'notes-edit-input';
+      input.value = (current === '—' || current.startsWith('Due ~')) ? '' : current;
+      input.placeholder = 'Add note…';
+
+      span.replaceWith(input);
+      btn.style.opacity = '0';
+      input.focus();
+
+      const save = async () => {
+        const newNotes = input.value.trim();
+        try {
+          await post('updateSpend', { id: rowTs, notes: newNotes });
+          const newSpan = document.createElement('span');
+          newSpan.className = 'notes-text';
+          newSpan.textContent = newNotes || '—';
+          input.replaceWith(newSpan);
+          btn.style.opacity = '';
+          showToast('Note updated.');
+        } catch (err) {
+          showToast('Failed to save note.', 'error');
+          input.focus();
+        }
+      };
+
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') { e.preventDefault(); save(); }
+        if (e.key === 'Escape') { input.replaceWith(span); btn.style.opacity = ''; }
+      });
+      input.addEventListener('blur', save);
     });
   });
 }
