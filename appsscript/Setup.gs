@@ -146,3 +146,22 @@ function migrateExistingSheet() {
 
   Logger.log('Migration complete.');
 }
+
+function addAvailableCreditColumn() {
+  var ss = getSpreadsheet();
+  var sheet = ss.getSheetByName('CreditCards');
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  if (headers.indexOf('AvailableCredit') !== -1) {
+    Logger.log('AvailableCredit already exists — skipped');
+    return;
+  }
+  var newCol = sheet.getLastColumn() + 1;
+  sheet.getRange(1, newCol).setValue('AvailableCredit')
+    .setBackground('#1a1a2e').setFontColor('#ffffff').setFontWeight('bold');
+  // Initialize all existing card rows to 0
+  var lastRow = sheet.getLastRow();
+  if (lastRow > 1) {
+    sheet.getRange(2, newCol, lastRow - 1, 1).setValue(0);
+  }
+  Logger.log('Added AvailableCredit column at col ' + newCol + ', initialized ' + (lastRow - 1) + ' rows to 0');
+}
