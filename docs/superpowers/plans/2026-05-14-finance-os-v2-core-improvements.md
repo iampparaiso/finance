@@ -1,10 +1,10 @@
-# Finance OS v2 — Core Improvements Implementation Plan
+﻿# Finance OS v2 â€” Core Improvements Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** Fix three bugs, add installments-per-card and accurate available credit to the Cards tab, build a bulk spend logging queue, add a toast system, API caching, skeleton screens, tab transitions, micro-interactions, a dashboard greeting, and responsiveness polish.
 
-**Architecture:** Backend-first — API.gs gets new actions (`updateSpend`, `bulkLogSpend`) and a bug fix (`payCreditCard` always clears PastDue), deployed via deploy.ps1 before any frontend work. Frontend changes are additive: new `toast.js` module, cache layer in `api.js`, and feature additions to existing render functions. SW cache bumped from v5 → v6 at the end.
+**Architecture:** Backend-first â€” API.gs gets new actions (`updateSpend`, `bulkLogSpend`) and a bug fix (`payCreditCard` always clears PastDue), deployed via deploy.ps1 before any frontend work. Frontend changes are additive: new `toast.js` module, cache layer in `api.js`, and feature additions to existing render functions. SW cache bumped from v5 â†’ v6 at the end.
 
 **Tech Stack:** Google Apps Script (backend), Vanilla JS ES modules (frontend), GitHub Pages (hosting), Google Sheets (database), PWA service worker.
 
@@ -30,7 +30,7 @@
 
 ---
 
-## Task 1: Fix API.gs — payCreditCard + add updateSpend + add bulkLogSpend
+## Task 1: Fix API.gs â€” payCreditCard + add updateSpend + add bulkLogSpend
 
 **Files:**
 - Modify: `appsscript/API.gs`
@@ -155,7 +155,7 @@ Open `frontend/config.js` and replace the `API_URL` line with the URL printed by
 
 - [ ] **Step 3: Verify new endpoints are live**
 
-Open the new URL in browser with `?action=getCards&token=test` — should get `{"ok":false,"error":"Unauthorized"}` (not a 404 or "Unknown action"). This confirms the deployment is live.
+Open the new URL in browser with `?action=getCards&token=test` â€” should get `{"ok":false,"error":"Unauthorized"}` (not a 404 or "Unknown action"). This confirms the deployment is live.
 
 - [ ] **Step 4: Commit and push config.js**
 
@@ -169,23 +169,23 @@ git -c credential.helper="" push https://iampparaiso:ghp_REDACTED@github.com/iam
 
 ## Task 3: Add AvailableCredit Column to Google Sheet
 
-**No code files** — manual sheet change.
+**No code files** â€” manual sheet change.
 
 - [ ] **Step 1: Open the Finance Google Sheet**
 
-Go to: https://script.google.com → open the Finance OS project → open the linked spreadsheet (or navigate directly from Drive as iampparaiso@gmail.com).
+Go to: https://script.google.com â†’ open the Finance OS project â†’ open the linked spreadsheet (or navigate directly from Drive as iampparaiso@gmail.com).
 
 - [ ] **Step 2: Add column to CreditCards tab**
 
-In the `CreditCards` tab, add a new column header `AvailableCredit` in the next empty column after the existing headers. Leave all data rows blank (null = "not yet set from SOA" — the frontend handles this gracefully).
+In the `CreditCards` tab, add a new column header `AvailableCredit` in the next empty column after the existing headers. Leave all data rows blank (null = "not yet set from SOA" â€” the frontend handles this gracefully).
 
 - [ ] **Step 3: Verify**
 
-Call `?action=getCards&token=<valid_token>` — each card object should now include `"AvailableCredit": ""` (or whatever the blank cell returns).
+Call `?action=getCards&token=<valid_token>` â€” each card object should now include `"AvailableCredit": ""` (or whatever the blank cell returns).
 
 ---
 
-## Task 4: Bug Fixes — Groceries Category + PastDue Modal Auto-uncheck
+## Task 4: Bug Fixes â€” Groceries Category + PastDue Modal Auto-uncheck
 
 **Files:**
 - Modify: `frontend/js/spend-log.js` (line 6)
@@ -412,15 +412,15 @@ Append to `frontend/css/app.css`:
 
 - [ ] **Step 2: Update the table row template in spend-log.js**
 
-Find the row template in `renderSpendLog` (around line 172–180). Replace the Notes `<td>` from:
+Find the row template in `renderSpendLog` (around line 172â€“180). Replace the Notes `<td>` from:
 ```javascript
-              <td class="muted" style="font-size:0.8rem">${r.Notes || (dueStr ? `Due ~${dueStr}` : '—')}</td>
+              <td class="muted" style="font-size:0.8rem">${r.Notes || (dueStr ? `Due ~${dueStr}` : 'â€”')}</td>
 ```
 With:
 ```javascript
               <td class="muted" style="font-size:0.8rem" data-row-ts="${r.Timestamp || i}">
-                <span class="notes-text">${r.Notes || (dueStr ? `Due ~${dueStr}` : '—')}</span>
-                <button class="notes-edit-btn" title="Edit note">✏</button>
+                <span class="notes-text">${r.Notes || (dueStr ? `Due ~${dueStr}` : 'â€”')}</span>
+                <button class="notes-edit-btn" title="Edit note">âœ</button>
               </td>
 ```
 
@@ -434,12 +434,12 @@ In `renderSpendLog`, after the delete button event handler block (after the `.sl
       const td      = btn.closest('td');
       const span    = td.querySelector('.notes-text');
       const rowTs   = td.dataset.rowTs;
-      const current = span.textContent === '—' ? '' : span.textContent;
+      const current = span.textContent === 'â€”' ? '' : span.textContent;
 
       const input = document.createElement('input');
       input.className = 'notes-edit-input';
       input.value = current.startsWith('Due ~') ? '' : current;
-      input.placeholder = 'Add note…';
+      input.placeholder = 'Add noteâ€¦';
 
       span.replaceWith(input);
       btn.style.opacity = '0';
@@ -451,7 +451,7 @@ In `renderSpendLog`, after the delete button event handler block (after the `.sl
           await post('updateSpend', { id: rowTs, notes: newNotes });
           const newSpan = document.createElement('span');
           newSpan.className = 'notes-text';
-          newSpan.textContent = newNotes || '—';
+          newSpan.textContent = newNotes || 'â€”';
           input.replaceWith(newSpan);
           btn.style.opacity = '';
           showToast('Note updated.');
@@ -542,7 +542,7 @@ function _renderQueue(cards) {
                 <td><span class="badge info">${e.category}</span></td>
                 <td class="muted" style="font-size:0.8rem">${e.cardId ? (cardMap[e.cardId] || e.cardId) : 'Cash'}</td>
                 <td class="mono" style="text-align:right;font-weight:600">${peso(e.amount)}</td>
-                <td style="text-align:center"><button class="queue-remove-btn" data-idx="${i}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:2px 6px">✕</button></td>
+                <td style="text-align:center"><button class="queue-remove-btn" data-idx="${i}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:2px 6px">âœ•</button></td>
               </tr>
             `).join('')}
           </tbody>
@@ -572,7 +572,7 @@ function _renderQueue(cards) {
   document.getElementById('queue-submit-btn').addEventListener('click', async () => {
     const submitBtn = document.getElementById('queue-submit-btn');
     submitBtn.disabled = true;
-    submitBtn.textContent = 'Saving…';
+    submitBtn.textContent = 'Savingâ€¦';
     try {
       const entries = _queue.map(e => ({
         date: e.date, description: e.description, amount: e.amount,
@@ -593,7 +593,7 @@ function _renderQueue(cards) {
 }
 ```
 
-Wait — `renderSpendLog` needs the container. Store it as a module-level variable. Replace the helper with this corrected version and add the container variable.
+Wait â€” `renderSpendLog` needs the container. Store it as a module-level variable. Replace the helper with this corrected version and add the container variable.
 
 Add after `let _queue = [];`:
 ```javascript
@@ -698,7 +698,7 @@ git commit -m "feat: bulk spend logging queue with Add to Queue / Submit All"
 
 ---
 
-## Task 9: Cards — Active Installments Per Card
+## Task 9: Cards â€” Active Installments Per Card
 
 **Files:**
 - Modify: `frontend/js/cards.js`
@@ -754,12 +754,12 @@ function _installmentsSection(card, allInstalls) {
       ${active.map(i => `
         <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:4px 0">
           <div>
-            <span style="color:var(--text2)">${i.Description || '—'}</span>
-            ${i.Note ? `<span style="color:var(--muted);font-size:0.75rem"> · ${i.Note}</span>` : ''}
+            <span style="color:var(--text2)">${i.Description || 'â€”'}</span>
+            ${i.Note ? `<span style="color:var(--muted);font-size:0.75rem"> Â· ${i.Note}</span>` : ''}
           </div>
           <div style="text-align:right;flex-shrink:0;margin-left:var(--sp3)">
             <span class="mono warn" style="font-weight:600">${peso(Number(i.MonthlyAmount))}/mo</span>
-            ${Number(i.MonthsRemaining) > 0 ? `<span style="color:var(--muted);font-size:0.72rem"> · ${i.MonthsRemaining} left</span>` : ''}
+            ${Number(i.MonthsRemaining) > 0 ? `<span style="color:var(--muted);font-size:0.72rem"> Â· ${i.MonthsRemaining} left</span>` : ''}
           </div>
         </div>
       `).join('')}
@@ -787,7 +787,7 @@ git commit -m "feat(cards): show active installments per card in detail panel"
 
 ---
 
-## Task 10: Cards — Available Credit from SOA
+## Task 10: Cards â€” Available Credit from SOA
 
 **Files:**
 - Modify: `frontend/js/cards.js`
@@ -804,7 +804,7 @@ In `openUpdateSOAModal`, the modal HTML has a Balance input and a Due Date input
 Replace with:
 ```javascript
       <div style="margin-bottom:var(--sp3)">
-        <label style="font-size:0.8rem;color:var(--muted);display:block;margin-bottom:4px">Available Credit (₱) — from SOA</label>
+        <label style="font-size:0.8rem;color:var(--muted);display:block;margin-bottom:4px">Available Credit (â‚±) â€” from SOA</label>
         <input type="number" id="soa-avail" value="${Number(card.AvailableCredit) || ''}" placeholder="e.g. 450000" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:var(--r1);background:var(--surface);color:var(--text);font-size:1rem;box-sizing:border-box">
       </div>
       <div style="margin-bottom:var(--sp3)">
@@ -942,7 +942,7 @@ function _greeting(d) {
   const h    = new Date().getHours();
   const past = d.pastDueCards && d.pastDueCards.length > 0;
   const oblPct = d.totalMonthlyIncome > 0 ? d.totalObligations / d.totalMonthlyIncome : 0;
-  if (past)        return 'Heads up — a couple of cards need attention.';
+  if (past)        return 'Heads up â€” a couple of cards need attention.';
   if (h >= 23 || h < 5) return 'Late night budgeting? Respect.';
   if (oblPct > 0.6) return 'Heavy month. Making it work.';
   if (h < 12)      return 'Good morning. You\'re on top of it.';
@@ -1030,7 +1030,7 @@ Append to `frontend/css/app.css`:
 
 - [ ] **Step 2: Fix card-detail CSS conflict**
 
-In `app.css`, find and remove the old card-detail rules (around lines 93–94):
+In `app.css`, find and remove the old card-detail rules (around lines 93â€“94):
 ```css
 .card-detail { padding: var(--sp4); border-top: 1px solid var(--border); display: none; }
 .card-detail.open { display: block; }
@@ -1119,7 +1119,7 @@ In `renderCards` (`cards.js`), remove:
 
 In `renderSpendLog` (`spend-log.js`), the loading spinner for `sl-content` is still valid (it's a partial re-render inside the already-loaded container). Leave it.
 
-In `renderDashboard` (`dashboard.js`), if there's a loading spinner set at the top, remove it. (Dashboard currently doesn't set one — the module-level skeleton handles it.)
+In `renderDashboard` (`dashboard.js`), if there's a loading spinner set at the top, remove it. (Dashboard currently doesn't set one â€” the module-level skeleton handles it.)
 
 - [ ] **Step 6: Commit**
 
@@ -1174,10 +1174,10 @@ In `renderSpendLog`, find the delete button event handler:
     btn.addEventListener('click', async () => {
       const rowId = btn.dataset.rowId;
       if (!confirm('Delete this transaction?')) return;
-      btn.disabled = true; btn.textContent = '…';
+      btn.disabled = true; btn.textContent = 'â€¦';
       const res = await post('deleteSpend', { id: rowId });
       if (res) renderSpendLog(container);
-      else { btn.disabled = false; btn.textContent = '✕'; }
+      else { btn.disabled = false; btn.textContent = 'âœ•'; }
     });
   });
 ```
@@ -1188,14 +1188,14 @@ Replace with:
       const rowId = btn.dataset.rowId;
       if (!confirm('Delete this transaction?')) return;
       const row = btn.closest('tr');
-      btn.disabled = true; btn.textContent = '…';
+      btn.disabled = true; btn.textContent = 'â€¦';
       row.classList.add('sl-row-removing');
       const res = await post('deleteSpend', { id: rowId });
       if (res) {
         setTimeout(() => renderSpendLog(container), 200);
       } else {
         row.classList.remove('sl-row-removing');
-        btn.disabled = false; btn.textContent = '✕';
+        btn.disabled = false; btn.textContent = 'âœ•';
         showToast('Could not delete entry.', 'error');
       }
     });
@@ -1218,7 +1218,7 @@ In `renderCards`, after the `container.innerHTML = \`...\`` block and before the
 
 ```bash
 git add frontend/css/app.css frontend/js/spend-log.js frontend/js/cards.js
-git commit -m "feat: micro-interactions — stat hover lift, row fade delete, past due badge pulse"
+git commit -m "feat: micro-interactions â€” stat hover lift, row fade delete, past due badge pulse"
 ```
 
 ---
@@ -1241,7 +1241,7 @@ Append to `frontend/css/app.css`:
   .detail-grid { grid-template-columns: 1fr !important; }
 }
 
-/* Queue panel mobile — fixed submit at bottom */
+/* Queue panel mobile â€” fixed submit at bottom */
 @media (max-width: 600px) {
   #sl-queue-panel .data-table { min-width: 420px; }
 }
@@ -1251,7 +1251,7 @@ Append to `frontend/css/app.css`:
 
 ```bash
 git add frontend/css/app.css
-git commit -m "fix: responsiveness — stat grid, detail grid, queue panel mobile"
+git commit -m "fix: responsiveness â€” stat grid, detail grid, queue panel mobile"
 ```
 
 ---
@@ -1288,24 +1288,25 @@ git -c credential.helper="" push https://iampparaiso:ghp_REDACTED@github.com/iam
 
 - [ ] **Step 3: Wait for GitHub Actions to deploy (~60 seconds)**
 
-Check: https://github.com/iampparaiso/finance/actions — wait for the deploy workflow to show green.
+Check: https://github.com/iampparaiso/finance/actions â€” wait for the deploy workflow to show green.
 
 - [ ] **Step 4: Bust the service worker**
 
 In Chrome DevTools on https://iampparaiso.github.io/finance/:
-- Application tab → Service Workers → click **Update**
+- Application tab â†’ Service Workers â†’ click **Update**
 - Then Ctrl+Shift+R (hard refresh)
 
 The app should now load with all v2 features active.
 
 - [ ] **Step 5: Verify key features**
 
-1. **Past Due fix:** Open Cards tab. If any card was past due, use Pay Card → pay it → verify OVERDUE badge clears.
-2. **Groceries:** Open Spend Log → Category dropdown → confirm "Groceries" appears between Food and Transport.
-3. **Inline notes:** Find the Makati Med Anesth row → click ✏ → type the correct due note → Enter → confirm it saves without page reload.
-4. **Queue:** Add 2–3 items to the queue using "Add to Queue" → confirm queue panel appears → "Submit All" → confirm single refresh and all entries appear.
-5. **Installments per card:** Open a card with active installments → expand → confirm installments section appears at bottom of detail.
-6. **Available Credit:** Open a card → Update SOA → fill in Available Credit → save → confirm card shows "(SOA)" label next to available figure.
+1. **Past Due fix:** Open Cards tab. If any card was past due, use Pay Card â†’ pay it â†’ verify OVERDUE badge clears.
+2. **Groceries:** Open Spend Log â†’ Category dropdown â†’ confirm "Groceries" appears between Food and Transport.
+3. **Inline notes:** Find the Makati Med Anesth row â†’ click âœ â†’ type the correct due note â†’ Enter â†’ confirm it saves without page reload.
+4. **Queue:** Add 2â€“3 items to the queue using "Add to Queue" â†’ confirm queue panel appears â†’ "Submit All" â†’ confirm single refresh and all entries appear.
+5. **Installments per card:** Open a card with active installments â†’ expand â†’ confirm installments section appears at bottom of detail.
+6. **Available Credit:** Open a card â†’ Update SOA â†’ fill in Available Credit â†’ save â†’ confirm card shows "(SOA)" label next to available figure.
 7. **Toast:** Any save action should show a slide-in toast instead of inline message.
-8. **Skeleton + transitions:** Navigate between tabs — should see shimmer skeleton on first load, instant on return (cached), with subtle fade-in animation.
-9. **Dashboard greeting:** Reload Dashboard — should show a contextual single-line greeting under the h1.
+8. **Skeleton + transitions:** Navigate between tabs â€” should see shimmer skeleton on first load, instant on return (cached), with subtle fade-in animation.
+9. **Dashboard greeting:** Reload Dashboard â€” should show a contextual single-line greeting under the h1.
+
