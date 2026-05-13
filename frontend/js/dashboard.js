@@ -1,5 +1,5 @@
 import { get } from './api.js';
-import { peso, pct } from './format.js';
+import { peso, pct, animateValue } from './format.js';
 import { computeAlerts, renderAlertBanners } from './alerts.js';
 import { openPayCardModal } from './cash-tracker.js';
 
@@ -18,7 +18,10 @@ export async function renderDashboard(container) {
 
   container.innerHTML = `
     <div class="page-header">
-      <h1>Dashboard</h1>
+      <div>
+        <h1>Dashboard</h1>
+        <div style="font-size:0.85rem;color:var(--muted);margin-top:2px">${_greeting(d)}</div>
+      </div>
       <span class="page-date">${new Date().toLocaleDateString('en-PH',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}</span>
     </div>
     <div id="dash-alerts"></div>
@@ -26,17 +29,17 @@ export async function renderDashboard(container) {
     <div class="stat-grid">
       <div class="stat-card">
         <div class="stat-label">Monthly Income</div>
-        <div class="stat-value ok">${peso(d.totalMonthlyIncome)}</div>
+        <div class="stat-value ok" data-animate="${d.totalMonthlyIncome}">${peso(d.totalMonthlyIncome)}</div>
         <div class="stat-sub">Combined household</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Total Obligations</div>
-        <div class="stat-value warn">${peso(d.totalObligations)}</div>
+        <div class="stat-value warn" data-animate="${d.totalObligations}">${peso(d.totalObligations)}</div>
         <div class="stat-sub">Loans + Bills + CC installs</div>
       </div>
       <div class="stat-card">
         <div class="stat-label">Net After Obligations</div>
-        <div class="stat-value ${d.netAfterObligations >= 0 ? 'ok' : 'danger'}">${peso(d.netAfterObligations)}</div>
+        <div class="stat-value ${d.netAfterObligations >= 0 ? 'ok' : 'danger'}" data-animate="${d.netAfterObligations}">${peso(d.netAfterObligations)}</div>
         <div class="stat-sub">Available for spending/saving</div>
       </div>
       <div class="stat-card">
@@ -46,7 +49,7 @@ export async function renderDashboard(container) {
       </div>
       <div class="stat-card">
         <div class="stat-label">Cash on Hand</div>
-        <div class="stat-value ${cashColor}">${peso(cashOnHand)}</div>
+        <div class="stat-value ${cashColor}" data-animate="${cashOnHand}">${peso(cashOnHand)}</div>
         <div class="stat-sub" id="dash-runway">—</div>
       </div>
     </div>
@@ -85,6 +88,23 @@ export async function renderDashboard(container) {
   // Runway blurb on cash stat card
   const runway = _runwaySummary(cashOnHand, cashLog);
   if (runway) document.getElementById('dash-runway').textContent = runway;
+
+  // Stat counter animations
+  container.querySelectorAll('[data-animate]').forEach(el => {
+    animateValue(el, parseFloat(el.dataset.animate), peso);
+  });
+}
+
+function _greeting(d) {
+  const h      = new Date().getHours();
+  const past   = d.pastDueCards && d.pastDueCards.length > 0;
+  const oblPct = d.totalMonthlyIncome > 0 ? d.totalObligations / d.totalMonthlyIncome : 0;
+  if (past)             return 'Heads up — a couple of cards need attention.';
+  if (h >= 23 || h < 5) return 'Late night budgeting? Respect.';
+  if (oblPct > 0.6)     return 'Heavy month. Making it work.';
+  if (h < 12)           return 'Good morning. You\'re on top of it.';
+  if (h < 18)           return 'Afternoon check-in. Looking solid.';
+  return 'Evening. Numbers are in check.';
 }
 
 function _renderInstallmentRelief(installments) {

@@ -39,3 +39,14 @@ export function pct(part, total) {
   if (!total) return 0;
   return Math.round((part / total) * 100);
 }
+
+export function animateValue(el, target, fmt, duration = 400) {
+  const start = performance.now();
+  const tick = now => {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased    = 1 - Math.pow(1 - progress, 3);
+    el.textContent = fmt(Math.round(target * eased));
+    if (progress < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
