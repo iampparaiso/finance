@@ -1,4 +1,5 @@
 import { setToken } from './api.js';
+import { hasUnsavedQueue, getQueueLength } from './spend-log.js';
 import { renderDashboard }     from './dashboard.js';
 import { renderCards }         from './cards.js';
 import { renderInstallments }  from './installments.js';
@@ -42,6 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('nav-tabs').addEventListener('click', async (e) => {
     const btn = e.target.closest('[data-module]');
     if (!btn) return;
+    if (currentModule === 'spend-log' && hasUnsavedQueue()) {
+      if (!confirm(`You have ${getQueueLength()} unsaved item${getQueueLength() !== 1 ? 's' : ''} in queue. Leave without saving?`)) return;
+    }
     document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
     btn.classList.add('active');
     currentModule = btn.dataset.module;

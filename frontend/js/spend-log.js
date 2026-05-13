@@ -6,6 +6,85 @@ import { renderCashTracker, openPayCardModal } from './cash-tracker.js';
 
 const CATEGORIES = ['Food', 'Groceries', 'Transport', 'Shopping', 'Health', 'Entertainment', 'Utilities', 'Other'];
 
+let _queue     = [];
+let _container = null;
+export function hasUnsavedQueue() { return _queue.length > 0; }
+export function getQueueLength()  { return _queue.length; }
+
+function _renderQueue(cards) {
+  const panel = document.getElementById('sl-queue-panel');
+  if (!panel) return;
+  if (!_queue.length) { panel.innerHTML = ''; return; }
+
+  const total   = _queue.reduce((s, e) => s + e.amount, 0);
+  const cardMap = {};
+  cards.forEach(c => { cardMap[c.ID] = c.Name; });
+
+  panel.innerHTML = `
+    <div style="margin-top:var(--sp4);background:var(--bg2);border:1px solid var(--border);border-radius:var(--r2);overflow:hidden">
+      <div style="padding:var(--sp3) var(--sp4);font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);border-bottom:1px solid var(--border)">
+        Queued (${_queue.length} item${_queue.length !== 1 ? 's' : ''})
+      </div>
+      <div style="overflow-x:auto;-webkit-overflow-scrolling:touch">
+        <table class="data-table" style="min-width:520px">
+          <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Card</th><th style="text-align:right">Amount</th><th></th></tr></thead>
+          <tbody>
+            ${_queue.map((e, i) => `
+              <tr>
+                <td class="mono" style="font-size:0.8rem">${e.date}</td>
+                <td style="font-size:0.85rem">${e.description}</td>
+                <td><span class="badge info">${e.category}</span></td>
+                <td class="muted" style="font-size:0.8rem">${e.cardId ? (cardMap[e.cardId] || e.cardId) : 'Cash'}</td>
+                <td class="mono" style="text-align:right;font-weight:600">${peso(e.amount)}</td>
+                <td style="text-align:center"><button class="queue-remove-btn" data-idx="${i}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:1rem;padding:2px 6px">✕</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:var(--sp3) var(--sp4);border-top:1px solid var(--border);flex-wrap:wrap;gap:var(--sp2)">
+        <span class="mono" style="font-weight:700">Total: ${peso(total)}</span>
+        <div style="display:flex;gap:var(--sp2)">
+          <button id="queue-clear-btn" class="btn" style="font-size:0.8rem">Clear Queue</button>
+          <button id="queue-submit-btn" class="btn btn-primary" style="font-size:0.8rem">Submit All (${_queue.length})</button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  panel.querySelectorAll('.queue-remove-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _queue.splice(Number(btn.dataset.idx), 1);
+      _renderQueue(cards);
+    });
+  });
+
+  document.getElementById('queue-clear-btn').addEventListener('click', () => {
+    if (confirm('Clear all queued items?')) { _queue = []; _renderQueue(cards); }
+  });
+
+  document.getElementById('queue-submit-btn').addEventListener('click', async () => {
+    const submitBtn = document.getElementById('queue-submit-btn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Saving…';
+    try {
+      const entries = _queue.map(e => ({
+        date: e.date, description: e.description, amount: e.amount,
+        category: e.category, cardId: e.cardId, notes: e.notes
+      }));
+      await post('bulkLogSpend', { entries });
+      const count = _queue.length;
+      _queue = [];
+      showToast(`${count} expense${count !== 1 ? 's' : ''} saved.`);
+      renderSpendLog(_container);
+    } catch (err) {
+      showToast('Failed to save queue: ' + err.message, 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = `Submit All (${_queue.length})`;
+    }
+  });
+}
+
 function _estimateDue(txDate, card) {
   if (!card) return null;
   const cutDay = parseInt(card.StatementCutDay) || 25;
@@ -21,6 +100,7 @@ function _estimateDue(txDate, card) {
 }
 
 export async function renderSpendLog(container) {
+  _container = container;
   container.innerHTML = `
     <div class="page-header">
       <h1>Spend Log</h1>
@@ -57,7 +137,11 @@ export async function renderSpendLog(container) {
           <input type="text" id="sl-notes" placeholder="e.g. 6-month installment, Split with Joeann">
         </div>
       </div>
-      <button class="btn btn-primary" id="sl-submit">Log Expense</button>
+      <div style="display:flex;gap:var(--sp2);flex-wrap:wrap">
+        <button class="btn btn-primary" id="sl-add-queue">Add to Queue</button>
+        <button class="btn" id="sl-submit">Save Now</button>
+      </div>
+      <div id="sl-queue-panel"></div>
     </div>
     <div id="sl-content"><div class="loading-spinner">Loading...</div></div>
   `;
@@ -101,25 +185,51 @@ export async function renderSpendLog(container) {
   // Re-render on cash-updated event
   document.addEventListener('cash-updated', () => renderSpendLog(container), { once: true });
 
-  // Log expense submit
+  // Re-render queue panel with current card data
+  _renderQueue(cards);
+
+  function _getFormValues() {
+    return {
+      date:        document.getElementById('sl-date').value,
+      description: document.getElementById('sl-desc').value.trim(),
+      amount:      parseFloat(document.getElementById('sl-amount').value),
+      category:    document.getElementById('sl-cat').value,
+      cardId:      document.getElementById('sl-card').value,
+      notes:       document.getElementById('sl-notes').value.trim(),
+    };
+  }
+
+  function _clearFormPartial() {
+    document.getElementById('sl-desc').value   = '';
+    document.getElementById('sl-amount').value = '';
+    document.getElementById('sl-notes').value  = '';
+    document.getElementById('sl-date').value   = new Date().toISOString().slice(0, 10);
+    document.getElementById('sl-desc').focus();
+  }
+
+  document.getElementById('sl-add-queue').addEventListener('click', () => {
+    const v = _getFormValues();
+    if (!v.date || !v.description || isNaN(v.amount) || v.amount <= 0) {
+      showToast('Fill in date, description, and amount first.', 'info');
+      return;
+    }
+    _queue.push(v);
+    _clearFormPartial();
+    _renderQueue(cards);
+  });
+
   document.getElementById('sl-submit').addEventListener('click', async () => {
-    const date        = document.getElementById('sl-date').value;
-    const description = document.getElementById('sl-desc').value.trim();
-    const amount      = parseFloat(document.getElementById('sl-amount').value);
-    const category    = document.getElementById('sl-cat').value;
-    const cardId      = document.getElementById('sl-card').value;
-    const notes       = document.getElementById('sl-notes').value.trim();
-    if (!date || !description || isNaN(amount) || amount <= 0) return;
+    const v = _getFormValues();
+    if (!v.date || !v.description || isNaN(v.amount) || v.amount <= 0) return;
     const btn = document.getElementById('sl-submit');
     btn.disabled = true; btn.textContent = 'Saving...';
-    const res = await post('logSpend', { date, description, amount, category, cardId, notes });
-    if (res) {
-      document.getElementById('sl-desc').value   = '';
-      document.getElementById('sl-amount').value = '';
-      document.getElementById('sl-notes').value  = '';
+    try {
+      await post('logSpend', { date: v.date, description: v.description, amount: v.amount, category: v.category, cardId: v.cardId, notes: v.notes });
+      showToast('Expense saved.');
       renderSpendLog(container);
-    } else {
-      btn.disabled = false; btn.textContent = 'Log Expense';
+    } catch (err) {
+      showToast('Failed to save: ' + err.message, 'error');
+      btn.disabled = false; btn.textContent = 'Save Now';
     }
   });
 
