@@ -236,6 +236,17 @@
 .data-table tr:hover .notes-edit-btn { opacity: 1; }
 .notes-edit-input { background: var(--bg); border: 1px solid var(--acc); border-radius: var(--r1); color: var(--text); font-size: 0.8rem; padding: 2px 6px; width: 160px; }
 
+/* === RESPONSIVENESS POLISH === */
+@media (max-width: 480px) {
+  .stat-grid { grid-template-columns: 1fr 1fr !important; }
+}
+@media (max-width: 400px) {
+  .detail-grid { grid-template-columns: 1fr !important; }
+}
+@media (max-width: 600px) {
+  #sl-queue-panel .data-table { min-width: 420px; }
+}
+
 /* === TOAST === */
 @keyframes toastIn {
   from { opacity: 0; transform: translateX(16px); }
