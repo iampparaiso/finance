@@ -168,7 +168,9 @@ function openUpdateSOAModal(card, onSuccess) {
 export async function renderCards(container) {
   container.innerHTML = '<div class="loading-spinner">Loading...</div>';
 
-  const [cards, spendRows] = await Promise.all([get('getCards'), get('getSpendLog')]);
+  const [cards, spendRows, allInstalls] = await Promise.all([
+    get('getCards'), get('getSpendLog'), get('getInstallments')
+  ]);
 
   const totalLimit   = cards.reduce((s,c) => s + Number(c.Limit), 0);
   const totalBalance = cards.reduce((s,c) => s + Number(c.Balance), 0);
@@ -207,7 +209,7 @@ export async function renderCards(container) {
       </div>` : ''}
     </div>
     ${_priorityQueue(cards)}
-    ${cards.map(c => _cardRow(c, spendRows)).join('')}
+    ${cards.map(c => _cardRow(c, spendRows, allInstalls)).join('')}
   `;
 
   container.querySelectorAll('.card-head').forEach(h => {
@@ -276,7 +278,37 @@ function _priorityQueue(cards) {
   `;
 }
 
-function _cardRow(c, spendRows) {
+function _installmentsSection(card, allInstalls) {
+  const active = (allInstalls || []).filter(i =>
+    i.Status === 'active' &&
+    i.CardID.toLowerCase() === card.ID.toLowerCase()
+  );
+  if (!active.length) return '';
+
+  const totalMonthly = active.reduce((s, i) => s + Number(i.MonthlyAmount), 0);
+  return `
+    <div style="margin-top:var(--sp3);padding-top:var(--sp3);border-top:1px solid var(--border)">
+      <div class="dl" style="font-size:0.7rem;color:var(--muted);text-transform:uppercase;margin-bottom:var(--sp2)">Active Installments</div>
+      ${active.map(i => `
+        <div style="display:flex;justify-content:space-between;font-size:0.82rem;padding:4px 0">
+          <div>
+            <span style="color:var(--text2)">${i.Description || '—'}</span>
+            ${i.Note ? `<span style="color:var(--muted);font-size:0.75rem"> · ${i.Note}</span>` : ''}
+          </div>
+          <div style="text-align:right;flex-shrink:0;margin-left:var(--sp3)">
+            <span class="mono warn" style="font-weight:600">${peso(Number(i.MonthlyAmount))}/mo</span>
+            ${Number(i.MonthsRemaining) > 0 ? `<span style="color:var(--muted);font-size:0.72rem"> · ${i.MonthsRemaining} left</span>` : ''}
+          </div>
+        </div>
+      `).join('')}
+      <div style="display:flex;justify-content:space-between;font-size:0.8rem;font-weight:700;padding-top:var(--sp2);margin-top:var(--sp1);border-top:1px solid var(--border)">
+        <span style="color:var(--muted)">Monthly installment load</span>
+        <span class="mono warn">${peso(totalMonthly)}/mo</span>
+      </div>
+    </div>`;
+}
+
+function _cardRow(c, spendRows, allInstalls) {
   const days     = daysUntil(c.DueDate);
   const utilPct  = pct(Number(c.Balance), Number(c.Limit));
   const fillColor = utilPct > 50 ? 'var(--danger)' : utilPct > 20 ? 'var(--warn)' : 'var(--ok)';
@@ -315,6 +347,7 @@ function _cardRow(c, spendRows) {
         ${c.CashAdvanceLimit?`<div class="detail-item"><div class="dl">Cash Advance</div><div class="dv">${peso(c.CashAdvanceLimit)}</div></div>`:''}
       </div>
       ${_unbilledSection(c, spendRows)}
+      ${_installmentsSection(c, allInstalls)}
       ${_perksSection(perks)}
       <div style="margin-top:var(--sp3);padding-top:var(--sp3);border-top:1px solid var(--border)">
         <button class="soa-update-btn btn" data-card-id="${c.ID}" style="width:100%;font-size:0.8rem">Update SOA / New Statement</button>
